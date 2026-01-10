@@ -1,8 +1,7 @@
-import { useState } from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
-  Container,
   Divider,
   IconButton,
   Paper,
@@ -13,9 +12,12 @@ import {
   TableRow,
   TextField,
   Typography,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { v4 as uuid } from "uuid";
+} from '@mui/material';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { useRef, useState } from 'react';
+import { v4 as uuid } from 'uuid';
+import { ClientInfo } from '../components/client-info';
 
 /* =========================
    TYPES
@@ -34,7 +36,7 @@ type Column = {
   key: keyof ServiceOrderItem;
   label: string;
   width?: number;
-  type?: "text" | "number";
+  type?: 'text' | 'number';
   disabled?: boolean;
 };
 
@@ -43,11 +45,11 @@ type Column = {
 ========================= */
 
 const columns: Column[] = [
-  { key: "quantity", label: "Qtd", width: 100, type: "number" },
-  { key: "description", label: "Descrição", type: "text" },
-  { key: "unitValue", label: "Valor Unit.", width: 120, type: "number" },
-  { key: "discount", label: "Desconto", width: 120, type: "number" },
-  { key: "total", label: "Total", width: 120, type: "number", disabled: true },
+  { key: 'quantity', label: 'Qtd', width: 100, type: 'number' },
+  { key: 'description', label: 'Descrição', type: 'text' },
+  { key: 'unitValue', label: 'Valor Unit.', width: 120, type: 'number' },
+  { key: 'discount', label: 'Desconto', width: 120, type: 'number' },
+  { key: 'total', label: 'Total', width: 120, type: 'number', disabled: true },
 ];
 
 /* =========================
@@ -55,9 +57,9 @@ const columns: Column[] = [
 ========================= */
 
 const emptyRow: ServiceOrderItem = {
-  id: "",
+  id: '',
   quantity: 1,
-  description: "",
+  description: '',
   unitValue: 0,
   discount: 0,
   total: 0,
@@ -68,7 +70,8 @@ const emptyRow: ServiceOrderItem = {
 ========================= */
 
 export function ServiceOrderPage() {
-  const [description, setDescription] = useState("");
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const [description, setDescription] = useState('');
   const [items, setItems] = useState<ServiceOrderItem[]>([
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
@@ -97,14 +100,12 @@ export function ServiceOrderPage() {
   function updateItem(
     id: string,
     field: keyof ServiceOrderItem,
-    value: string | number
+    value: string | number,
   ) {
     setItems((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? calculateRow({ ...item, [field]: value })
-          : item
-      )
+        item.id === id ? calculateRow({ ...item, [field]: value }) : item,
+      ),
     );
   }
 
@@ -116,18 +117,38 @@ export function ServiceOrderPage() {
     setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
-  const totalServiceOrder = items.reduce(
-    (acc, item) => acc + item.total,
-    0
+  const totalServiceOrder = items.reduce((acc, item) => acc + item.total, 0);
+  const totalDiscountServiceOrder = items.reduce(
+    (acc, item) => acc + item.discount,
+    0,
   );
+
+  async function handleGeneratePDF() {
+    if (!pdfRef.current) return;
+
+    const canvas = await html2canvas(pdfRef.current, {
+      scale: 2, // melhora qualidade
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+    pdf.save('ordem-de-servico.pdf');
+  }
 
   /* =========================
      RENDER
   ========================= */
 
   return (
-    <Container maxWidth="md" sx={{ mb: 6 }}>
-      <Paper sx={{ p: 4 }}>
+    <Paper sx={{ mb: 6, p: 4 }}>
+      <Paper sx={{ p: 4 }} ref={pdfRef}>
         {/* HEADER */}
         <Box display="flex" justifyContent="space-between">
           <Box>
@@ -136,15 +157,9 @@ export function ServiceOrderPage() {
 
           <Box textAlign="right">
             <Typography variant="h6">Empresa Exemplo LTDA</Typography>
-            <Typography variant="body2">
-              Rua Exemplo, 123 - Centro
-            </Typography>
-            <Typography variant="body2">
-              CEP 00000-000
-            </Typography>
-            <Typography variant="body2">
-              CNPJ: 00.000.000/0001-00
-            </Typography>
+            <Typography variant="body2">Rua Exemplo, 123 - Centro</Typography>
+            <Typography variant="body2">CEP 00000-000</Typography>
+            <Typography variant="body2">CNPJ: 00.000.000/0001-00</Typography>
           </Box>
         </Box>
 
@@ -198,9 +213,9 @@ export function ServiceOrderPage() {
                         updateItem(
                           row.id,
                           col.key,
-                          col.type === "number"
+                          col.type === 'number'
                             ? Number(e.target.value)
-                            : e.target.value
+                            : e.target.value,
                         )
                       }
                     />
@@ -208,7 +223,7 @@ export function ServiceOrderPage() {
                 ))}
 
                 <TableCell>
-                  <IconButton onClick={() => removeRow(row.id)}>
+                  <IconButton onClick={() => removeRow(row.id)} color="error">
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -224,38 +239,40 @@ export function ServiceOrderPage() {
         <Divider sx={{ my: 3 }} />
 
         {/* TOTAL */}
-        <Box display="flex" justifyContent="flex-end">
-          <Typography variant="h6">
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="flex-end"
+          alignContent="flex-end"
+          alignItems="flex-end">
+          <Typography variant="h6" fontSize={16}>
+            Desconto: R$ {totalDiscountServiceOrder.toFixed(2)}
+          </Typography>
+          <Typography variant="h5">
             Total: R$ {totalServiceOrder.toFixed(2)}
           </Typography>
         </Box>
 
         <Divider sx={{ my: 3 }} />
 
-        {/* CLIENT INFO */}
-        <Typography variant="h6" gutterBottom>
-          Dados do Cliente
-        </Typography>
-
-        <Typography>Nome: João da Silva</Typography>
-        <Typography>Documento: 000.000.000-00</Typography>
-        <Typography>Telefone: (00) 00000-0000</Typography>
-
-        <Divider sx={{ my: 4 }} />
-
-        {/* SIGNATURE */}
-        <Typography variant="body2" gutterBottom>
-          Assinatura do Cliente
-        </Typography>
-
-        <Box
-          sx={{
-            borderBottom: "1px solid #000",
-            height: 40,
-            width: "100%",
-          }}
-        />
+        <ClientInfo />
       </Paper>
-    </Container>
+
+      <Box display="flex" flex="1">
+        <Box display="flex" justifyContent="flex-start" marginTop={2}>
+          <Button>Dashboard</Button>
+        </Box>
+
+        <Box display="flex" justifyContent="flex-start" marginTop={2}>
+          <Button>Ordens de serviço</Button>
+        </Box>
+
+        <Box display="flex" justifyContent="flex-end" marginTop={2} flex={1}>
+          <Button variant="contained" onClick={handleGeneratePDF}>
+            Exportar PDF
+          </Button>
+        </Box>
+      </Box>
+    </Paper>
   );
 }

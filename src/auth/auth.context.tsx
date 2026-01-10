@@ -1,16 +1,16 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import api from "../api/axios";
-import type { User } from "../models/user.interface";
+import { createContext, useContext, useEffect, useState } from 'react';
+import api from '../api/axios';
+import type { User } from '../models/user.interface';
 
 type AuthContextData = {
   accessToken: string | null;
   user: User | null;
   login: (username: string, password: string) => void;
   logout: () => void;
-  handleRefreshToken: ()=> void;
+  handleRefreshToken: () => void;
 };
 
-interface AuthResponse{
+interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   user: User;
@@ -19,11 +19,11 @@ interface AuthResponse{
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null );
-  const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
+  const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(
+    localStorage.getItem('accessToken'),
+  );
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-
-
 
   async function loadUser() {
     if (!accessToken) {
@@ -31,29 +31,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await api.get<User>("/me", {
-        
-      });
+      const response = await api.get<User>('/me', {});
       setUser(response.data);
-    } catch(e) {
-      console.error(e)
+    } catch (e) {
+      console.error(e);
       setUser(null);
-      setAccessToken(null)
+      setAccessToken(null);
     }
   }
 
-
-
-  async function login(username: string,password: string) {
-    
-    const response = await api.post<AuthResponse>("/login", {
+  async function login(username: string, password: string) {
+    const response = await api.post<AuthResponse>('/login', {
       username,
       password,
     });
 
-    localStorage.setItem("accessToken", response.data.accessToken);
-    setRefreshToken(response.data.refreshToken)
-    setAccessToken(response.data.accessToken)
+    localStorage.setItem('accessToken', response.data.accessToken);
+    setRefreshToken(response.data.refreshToken);
+    setAccessToken(response.data.accessToken);
     setUser(response.data.user);
   }
 
@@ -66,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout() {
-    localStorage.removeItem("accessToken");
+    localStorage.removeItem('accessToken');
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
@@ -78,7 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user,accessToken, login, logout, handleRefreshToken }}>
+    <AuthContext.Provider
+      value={{ user, accessToken, login, logout, handleRefreshToken }}>
       {children}
     </AuthContext.Provider>
   );

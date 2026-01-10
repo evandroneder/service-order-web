@@ -1,22 +1,14 @@
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-} from "@mui/material";
-import { useState } from "react";
-import { useAuth } from "../auth/auth.context";
+import { Box, Button, TextField, Typography, Paper } from '@mui/material';
+import { useState } from 'react';
+import { useAuth } from '../auth/auth.context';
 
 export function LoginPage() {
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   async function handleSubmit() {
- 
-    await login(   username,
-      password,);
+    await login(username, password);
   }
 
   return (
@@ -24,8 +16,7 @@ export function LoginPage() {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      height="100vh"
-    >
+      height="100vh">
       <Paper sx={{ p: 4, width: 320 }}>
         <Typography variant="h6" mb={2}>
           Login
@@ -48,11 +39,7 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleSubmit}
-        >
+        <Button variant="contained" fullWidth onClick={handleSubmit}>
           Entrar
         </Button>
       </Paper>

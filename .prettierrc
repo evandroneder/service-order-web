@@ -1,0 +1,11 @@
+{
+  "singleQuote": true,
+  "bracketSameLine": true,
+  "trailingComma": "all",
+  "importOrderSeparation": true,
+  "endOfLine": "auto",
+  "printWidth": 80,
+  "arrowParens": "always",
+  "semi": true,
+  "tabWidth": 2
+}

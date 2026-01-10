@@ -1,9 +1,9 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { PrivateRoute } from "./auth/private-route";
-import { PublicRoute } from "./auth/public-route";
-import { DashboardPage } from "./pages/dashboard.page";
-import { LoginPage } from "./pages/login.page";
-import { ServiceOrderPage } from "./pages/service-order.page";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { PrivateRoute } from './auth/private-route';
+import { PublicRoute } from './auth/public-route';
+import { DashboardPage } from './pages/dashboard.page';
+import { LoginPage } from './pages/login.page';
+import { ServiceOrderPage } from './pages/service-order.page';
 
 function App() {
   return (
@@ -18,7 +18,6 @@ function App() {
           }
         />
 
-        
         <Route
           path="/"
           element={

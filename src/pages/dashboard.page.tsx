@@ -1,11 +1,11 @@
-import { Button, Container, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Button, Container, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 export function DashboardPage() {
   const navigate = useNavigate();
 
   function handleNewServiceOrder() {
-    navigate("/service-order/new");
+    navigate('/service-order/new');
   }
 
   return (
@@ -17,8 +17,7 @@ export function DashboardPage() {
       <Button
         variant="contained"
         color="primary"
-        onClick={handleNewServiceOrder}
-      >
+        onClick={handleNewServiceOrder}>
         Nova Ordem de Serviço
       </Button>
     </Container>
