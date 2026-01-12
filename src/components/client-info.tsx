@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { Box, Button, Divider, TextField, Typography } from '@mui/material';
 import { CreateClientModal } from './create-client-modal';
@@ -33,7 +32,7 @@ export function ClientInfo() {
         `/client/by-document?document=${document}`,
       );
       setClient(result.data);
-    } catch (e: any) {
+    } catch (e) {
       snackbar.error(e);
       console.error(e);
     }

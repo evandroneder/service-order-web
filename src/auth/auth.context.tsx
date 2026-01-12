@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../api/axios';
 import type { User } from '../models/user.interface';
+import { AuthTokenService } from '../api/auth.service';
 
 type AuthContextData = {
   accessToken: string | null;
   user: User | null;
   login: (username: string, password: string) => void;
   logout: () => void;
-  handleRefreshToken: () => void;
 };
 
 interface AuthResponse {
@@ -23,7 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(
     localStorage.getItem('accessToken'),
   );
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
   async function loadUser() {
     if (!accessToken) {
@@ -31,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await api.get<User>('/me', {});
+      const response = await api.get<User>('/me');
       setUser(response.data);
     } catch (e) {
       console.error(e);
@@ -47,24 +46,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     localStorage.setItem('accessToken', response.data.accessToken);
-    setRefreshToken(response.data.refreshToken);
+    AuthTokenService.setTokens(response.data);
     setAccessToken(response.data.accessToken);
     setUser(response.data.user);
-  }
-
-  async function handleRefreshToken() {
-    if (!refreshToken) return;
-
-    // futuramente:
-    // const response = await api.post("/refresh", { refreshToken })
-    // setAccessToken(response.data.accessToken)
   }
 
   function logout() {
     localStorage.removeItem('accessToken');
     setUser(null);
     setAccessToken(null);
-    setRefreshToken(null);
   }
 
   useEffect(() => {
@@ -73,8 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{ user, accessToken, login, logout, handleRefreshToken }}>
+    <AuthContext.Provider value={{ user, accessToken, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

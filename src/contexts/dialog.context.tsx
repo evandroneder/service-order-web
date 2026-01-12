@@ -24,7 +24,7 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
-  function closeDialog(result?: any) {
+  function closeDialog(result?) {
     dialog?.resolve(result);
     setDialog(null);
   }

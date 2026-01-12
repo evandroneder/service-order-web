@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-refresh/only-export-components */
 import { Alert, type AlertColor, Snackbar } from '@mui/material';
 import { AxiosError } from 'axios';
 import React, { createContext, useCallback, useContext, useState } from 'react';
@@ -72,6 +70,7 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSnackbar(): SnackbarContextData {
   const context = useContext(SnackbarContext);
 

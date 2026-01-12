@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Button,
   Dialog,
@@ -35,7 +34,7 @@ type ViaCepResponse = {
 
 type Props = {
   onClose?: () => void;
-  onConfirm?: (data: any) => void;
+  onConfirm?: (data) => void;
 };
 
 export function CreateClientModal({ onClose, onConfirm }: Props) {

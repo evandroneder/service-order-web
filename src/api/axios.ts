@@ -1,11 +1,24 @@
 import axios from 'axios';
+import { AuthTokenService } from './auth.service';
+
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+
+  failedQueue = [];
+};
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '127.0.0.0:3000',
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = AuthTokenService.getAccessToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -17,10 +30,47 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // aqui você chama o refresh token
-      // se falhar → logout
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = AuthTokenService.getRefreshToken();
+
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/refresh`,
+          { refreshToken },
+        );
+
+        AuthTokenService.setTokens({
+          accessToken: response.data.accessToken,
+        });
+
+        processQueue(null, response.data.accessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
+
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        AuthTokenService.clearTokens();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     return Promise.reject(error);
   },
 );
