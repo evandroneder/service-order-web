@@ -167,21 +167,19 @@ export function ViewServiceOrderPage() {
         </Box>
 
         {/* FOOTER */}
+
         <Box
-          sx={{ p: 4, width: '100%' }}
+          sx={{ p: 4, width: '100%', gap: 1 }}
           display="flex"
           justifyContent="flex-end"
           mt={3}>
-          <Button variant="contained" onClick={handleEdit}>
+          <Button variant="outlined" onClick={handleEdit}>
             Editar
           </Button>
-        </Box>
-        <Box
-          sx={{ p: 4, width: '100%' }}
-          display="flex"
-          justifyContent="flex-end"
-          mt={3}>
-          <Button variant="contained" onClick={handleGeneratePDF}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleGeneratePDF}>
             Exportar PDF
           </Button>
         </Box>

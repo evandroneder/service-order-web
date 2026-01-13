@@ -39,7 +39,11 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Button variant="contained" fullWidth onClick={handleSubmit}>
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!username || !password}>
           Entrar
         </Button>
       </Paper>

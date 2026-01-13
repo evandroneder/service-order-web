@@ -165,6 +165,10 @@ export function ServiceOrderPage() {
   //   0,
   // );
 
+  function cancelEdit() {
+    navigate('/service-orders/view/' + id);
+  }
+
   async function createServiceOrder() {
     const payload = {
       description,
@@ -338,8 +342,21 @@ export function ServiceOrderPage() {
         </Box>
 
         <Box display="flex" flex="1">
-          <Box display="flex" justifyContent="flex-end" marginTop={2} flex={1}>
-            <Button variant="contained" onClick={createServiceOrder}>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            marginTop={2}
+            flex={1}
+            gap={1}>
+            {id && (
+              <Button variant="contained" onClick={cancelEdit}>
+                Cancelar
+              </Button>
+            )}
+            <Button
+              variant="contained"
+              color="success"
+              onClick={createServiceOrder}>
               {id ? 'Atualizar' : 'Efetivar'}
             </Button>
           </Box>
