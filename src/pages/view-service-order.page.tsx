@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Container,
   Divider,
   Table,
   TableBody,
@@ -14,38 +15,9 @@ import jsPDF from 'jspdf';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { serviceOrderService } from '../api/service-order.service';
-
-/* =========================
-   TYPES
-========================= */
-
-interface Company {
-  id_company: number;
-  name: string;
-  document: string;
-  phone: string;
-  cep: string;
-  street: string;
-  number: number;
-  complement?: string;
-  email: string;
-  logo_url?: string;
-}
-
-// interface Client {
-//   name: string;
-//   document: string;
-//   phone: string;
-// }
-
-type ServiceOrderItem = {
-  id: string;
-  quantity: number;
-  description: string;
-  unitValue: number;
-  discount: number;
-  total: number;
-};
+import { ClientInfo } from '../components/client-info';
+import type { ServiceOrder } from '../models/service-order.interface';
+import moment from 'moment';
 
 /* =========================
    PAGE
@@ -55,31 +27,36 @@ export function ViewServiceOrderPage() {
   const { id } = useParams();
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  const [company, setCompany] = useState<Company | null>(null);
-  //   const [client, setClient] = useState<Client | null>(null);
-  const [description, setDescription] = useState('');
-  const [items, setItems] = useState<ServiceOrderItem[]>([]);
+  const [serviceOrder, setServiceOrder] = useState<ServiceOrder | null>(null);
 
   useEffect(() => {
     async function loadServiceOrder() {
       const { data } = await serviceOrderService.find(id);
 
-      setCompany(data.company);
-      //   setClient(data.client);
-      setDescription(data.description);
-      setItems(data.items);
+      setServiceOrder(data);
     }
 
     loadServiceOrder();
   }, [id]);
 
-  const totalDiscount = items.reduce((acc, item) => acc + item.discount, 0);
-  const totalValue = items.reduce((acc, item) => acc + item.total, 0);
+  if (!serviceOrder) {
+    return <div>loading...</div>;
+  }
+
+  const totalValue = serviceOrder.products.reduce(
+    (acc, item) => acc + item.value,
+    0,
+  );
 
   async function handleGeneratePDF() {
     if (!pdfRef.current) return;
 
-    const canvas = await html2canvas(pdfRef.current, { scale: 2 });
+    const canvas = await html2canvas(pdfRef.current, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+    });
+
     const imgData = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -87,7 +64,10 @@ export function ViewServiceOrderPage() {
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save('ordem-de-servico.pdf');
+
+    const fileName = serviceOrder.client.name.replaceAll(' ', '_');
+    const today = moment().format('DD/MM/YYYY');
+    pdf.save(`${fileName}_${today}_OS.pdf`);
   }
 
   /* =========================
@@ -95,14 +75,14 @@ export function ViewServiceOrderPage() {
   ========================= */
 
   return (
-    <Box sx={{ mb: 6, p: 4 }} display="flex" justifyContent="center">
-      <Box sx={{ p: 4, maxWidth: '900px', width: '100%' }}>
-        <Box ref={pdfRef}>
+    <Container maxWidth={'md'} sx={{ mb: 6 }}>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ p: 4, width: '100%' }} ref={pdfRef}>
           {/* HEADER */}
-          {company && (
+          {serviceOrder.company && (
             <Box display="flex" justifyContent="space-between">
               <img
-                src={company.logo_url}
+                src={serviceOrder.company.logo_url}
                 alt="Logo"
                 height={160}
                 width={160}
@@ -110,13 +90,17 @@ export function ViewServiceOrderPage() {
               />
 
               <Box textAlign="right">
-                <Typography variant="h4">{company.name}</Typography>
-                <Typography variant="body2">
-                  {company.street}, {company.number}
+                <Typography variant="h4">
+                  {serviceOrder.company.name}
                 </Typography>
-                <Typography variant="body2">CEP: {company.cep}</Typography>
                 <Typography variant="body2">
-                  CNPJ: {company.document}
+                  {serviceOrder.company.street}, {serviceOrder.company.number}
+                </Typography>
+                <Typography variant="body2">
+                  CEP: {serviceOrder.company.cep}
+                </Typography>
+                <Typography variant="body2">
+                  CNPJ: {serviceOrder.company.document}
                 </Typography>
               </Box>
             </Box>
@@ -127,7 +111,7 @@ export function ViewServiceOrderPage() {
           {/* SERVICE DESCRIPTION */}
           <Typography variant="h6">Descrição do Serviço</Typography>
           <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mt: 1 }}>
-            {description}
+            {serviceOrder.description}
           </Typography>
 
           <Divider sx={{ my: 3 }} />
@@ -143,19 +127,19 @@ export function ViewServiceOrderPage() {
                 <TableCell>Qtd</TableCell>
                 <TableCell>Descrição</TableCell>
                 <TableCell>Valor Unit.</TableCell>
-                <TableCell>Desconto</TableCell>
                 <TableCell>Total</TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {items.map((item) => (
+              {serviceOrder.products.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{item.description}</TableCell>
-                  <TableCell>R$ {item.unitValue.toFixed(2)}</TableCell>
-                  <TableCell>R$ {item.discount.toFixed(2)}</TableCell>
-                  <TableCell>R$ {item.total.toFixed(2)}</TableCell>
+                  <TableCell>R$ {item.value}</TableCell>
+                  <TableCell>
+                    R$ {(item.value * item.quantity).toFixed(2)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -165,7 +149,6 @@ export function ViewServiceOrderPage() {
 
           {/* TOTAL */}
           <Box display="flex" flexDirection="column" alignItems="flex-end">
-            <Typography>Desconto: R$ {totalDiscount.toFixed(2)}</Typography>
             <Typography variant="h5">
               Total: R$ {totalValue.toFixed(2)}
             </Typography>
@@ -173,16 +156,22 @@ export function ViewServiceOrderPage() {
 
           <Divider sx={{ my: 3 }} />
 
-          {/* {client && <ClientInfo client={client} />} */}
+          {serviceOrder.client && (
+            <ClientInfo client={serviceOrder.client} hideChange />
+          )}
         </Box>
 
         {/* FOOTER */}
-        <Box display="flex" justifyContent="flex-end" mt={3}>
+        <Box
+          sx={{ p: 4, width: '100%' }}
+          display="flex"
+          justifyContent="flex-end"
+          mt={3}>
           <Button variant="contained" onClick={handleGeneratePDF}>
             Exportar PDF
           </Button>
         </Box>
       </Box>
-    </Box>
+    </Container>
   );
 }

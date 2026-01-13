@@ -1,15 +1,17 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { PrivateRoute } from './auth/private-route';
 import { PublicRoute } from './auth/public-route';
-import { DashboardPage } from './pages/dashboard.page';
-import { LoginPage } from './pages/login.page';
+import { DefaultLayout } from './layouts/default.layout';
 import { ServiceOrderPage } from './pages/create-service-order.page';
+import { ServiceOrderListPage } from './pages/list-service-order.page';
+import { LoginPage } from './pages/login.page';
 import { ViewServiceOrderPage } from './pages/view-service-order.page';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* PUBLIC */}
         <Route
           path="/login"
           element={
@@ -19,31 +21,27 @@ function App() {
           }
         />
 
+        {/* PRIVATE + LAYOUT */}
         <Route
-          path="/"
           element={
             <PrivateRoute>
-              <DashboardPage />
+              <DefaultLayout />
             </PrivateRoute>
-          }
-        />
+          }>
+          <Route path="/" element={<ServiceOrderListPage />} />
 
-        <Route
-          path="/service-order/new"
-          element={
-            <PrivateRoute>
-              <ServiceOrderPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/service-order/:id"
-          element={
-            <PrivateRoute>
-              <ViewServiceOrderPage />
-            </PrivateRoute>
-          }
-        />
+          <Route path="/service-orders/new" element={<ServiceOrderPage />} />
+
+          <Route
+            path="/service-orders/view/:id"
+            element={<ViewServiceOrderPage />}
+          />
+
+          <Route
+            path="/service-orders/edit/:id"
+            element={<ServiceOrderPage />}
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

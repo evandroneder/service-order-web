@@ -13,36 +13,18 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import api from '../api/axios';
-import { ClientInfo } from '../components/client-info';
 import { serviceOrderService } from '../api/service-order.service';
+import { ClientInfo } from '../components/client-info';
+import type { Company } from '../models/company.interface';
+import type { ServiceOrderItem } from '../models/service-order.interface';
+import { useSnackbar } from '../contexts/snackbar.context';
 
 /* =========================
    TYPES
 ========================= */
-
-interface Company {
-  id_company: number;
-  name: string;
-  document: string;
-  phone: string;
-  cep: string;
-  street: string;
-  number: number;
-  complement?: string;
-  email: string;
-  logo_url?: string;
-}
-
-type ServiceOrderItem = {
-  id: string;
-  quantity: number;
-  description: string;
-  unitValue: number;
-  // discount: number;
-  total: number;
-};
 
 type Column = {
   key: keyof ServiceOrderItem;
@@ -59,7 +41,7 @@ type Column = {
 const columns: Column[] = [
   { key: 'quantity', label: 'Qtd', width: 100, type: 'number' },
   { key: 'description', label: 'Descrição', type: 'text' },
-  { key: 'unitValue', label: 'Valor Unit.', width: 120, type: 'number' },
+  { key: 'value', label: 'Valor Unit.', width: 120, type: 'number' },
   // { key: 'discount', label: 'Desconto', width: 120, type: 'number' },
   { key: 'total', label: 'Total', width: 120, type: 'number', disabled: true },
 ];
@@ -72,7 +54,7 @@ const emptyRow: ServiceOrderItem = {
   id: '',
   quantity: 1,
   description: '',
-  unitValue: 0,
+  value: 0,
   // discount: 0,
   total: 0,
 };
@@ -82,8 +64,12 @@ const emptyRow: ServiceOrderItem = {
 ========================= */
 
 export function ServiceOrderPage() {
+  const { id } = useParams();
+  const snackbar = useSnackbar();
+
   const [description, setDescription] = useState('');
   const [company, setCompany] = useState(null);
+  const [client, setClient] = useState(null);
   const [items, setItems] = useState<ServiceOrderItem[]>([
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
@@ -96,22 +82,50 @@ export function ServiceOrderPage() {
   ]);
 
   useEffect(() => {
-    const getCompanies = async () => {
-      const result = await api.get<Company[]>('/companies');
+    if (id) {
+      async function loadServiceOrder() {
+        const { data } = await serviceOrderService.find(id);
 
-      if (result.data.length > 0) {
-        setCompany(result.data[0]);
+        setDescription(data.description);
+        setCompany(data.company);
+        setClient(data.client);
+
+        setItems((items) => {
+          return items.map((item, index) => {
+            const product = data.products[index];
+
+            if (!product) return item;
+
+            return {
+              id: item.id,
+              description: product.description,
+              value: product.value,
+              quantity: product.quantity,
+              total: product.quantity * product.value,
+            } as ServiceOrderItem;
+          });
+        });
       }
-    };
-    getCompanies();
-  }, []);
+
+      loadServiceOrder();
+    } else {
+      const getCompanies = async () => {
+        const result = await api.get<Company[]>('/companies');
+
+        if (result.data.length > 0) {
+          setCompany(result.data[0]);
+        }
+      };
+      getCompanies();
+    }
+  }, [id]);
 
   /* =========================
      HELPERS
   ========================= */
 
   function calculateRow(row: ServiceOrderItem): ServiceOrderItem {
-    const subtotal = row.quantity * row.unitValue;
+    const subtotal = row.quantity * row.value;
     // const total = subtotal - row.discount;
     const total = subtotal;
 
@@ -148,7 +162,7 @@ export function ServiceOrderPage() {
   // );
 
   async function createServiceOrder() {
-    serviceOrderService.create({
+    const payload = {
       description,
       id_client: 1,
       id_company: company?.id_company,
@@ -157,15 +171,22 @@ export function ServiceOrderPage() {
           (item) =>
             !!item.description &&
             item.quantity > 0 &&
-            !!item.unitValue &&
-            item.unitValue > 0,
+            !!item.value &&
+            item.value > 0,
         )
         .map((item) => ({
           quantity: item.quantity,
           description: item.description,
-          value: item.unitValue,
+          value: item.value,
         })),
-    });
+    };
+    if (id) {
+      await serviceOrderService
+        .update(id, payload)
+        .catch((e) => snackbar.error(e));
+      return;
+    }
+    await serviceOrderService.create(payload).catch((e) => snackbar.error(e));
   }
 
   /* =========================
@@ -173,8 +194,8 @@ export function ServiceOrderPage() {
   ========================= */
 
   return (
-    <Box sx={{ mb: 6, p: 4 }} justifyContent="center" display="flex">
-      <Box sx={{ mb: 6, p: 4, maxWidth: '900px' }}>
+    <Box sx={{ mb: 6 }} justifyContent="center" display="flex">
+      <Box sx={{ mb: 6, maxWidth: '900px' }}>
         <Box sx={{ p: 4 }}>
           {/* HEADER */}
           {company && (
@@ -294,18 +315,10 @@ export function ServiceOrderPage() {
 
           <Divider sx={{ my: 3 }} />
 
-          <ClientInfo />
+          <ClientInfo client={client} />
         </Box>
 
         <Box display="flex" flex="1">
-          <Box display="flex" justifyContent="flex-start" marginTop={2}>
-            <Button>Dashboard</Button>
-          </Box>
-
-          <Box display="flex" justifyContent="flex-start" marginTop={2}>
-            <Button>Ordens de serviço</Button>
-          </Box>
-
           <Box display="flex" justifyContent="flex-end" marginTop={2} flex={1}>
             <Button variant="contained" onClick={createServiceOrder}>
               Efetivar

@@ -1,22 +1,21 @@
-import { useState } from 'react';
 import { Box, Button, Divider, TextField, Typography } from '@mui/material';
-import { CreateClientModal } from './create-client-modal';
-import { useDialog } from '../contexts/dialog.context';
+import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { useDialog } from '../contexts/dialog.context';
 import { useSnackbar } from '../contexts/snackbar.context';
+import { CreateClientModal } from './create-client-modal';
+import type { Client } from '../models/client.interface';
 
-type Client = {
-  id_client: number;
-  name: string;
-  document: string;
-  phone: string;
-};
-
-export function ClientInfo() {
+export function ClientInfo(props) {
   const [document, setDocument] = useState('');
-  const [client, setClient] = useState<Client | null>(null);
+  const [client, setClient] = useState<Client | null>(props.client);
+  const [hideChange] = useState(props.hideChange);
   const { openDialog } = useDialog();
   const snackbar = useSnackbar();
+
+  useEffect(() => {
+    setClient(props.client);
+  }, [props]);
 
   async function handleAddClient() {
     const client = await openDialog<Client>(<CreateClientModal />);
@@ -72,9 +71,11 @@ export function ClientInfo() {
             <Typography>Documento: {client.document}</Typography>
             <Typography>Telefone: {client.phone}</Typography>
 
-            <Button sx={{ mt: 2 }} size="small" onClick={handleChangeClient}>
-              Alterar cliente
-            </Button>
+            {!hideChange && (
+              <Button sx={{ mt: 2 }} size="small" onClick={handleChangeClient}>
+                Alterar cliente
+              </Button>
+            )}
           </Box>
 
           <Divider sx={{ my: 4 }} />

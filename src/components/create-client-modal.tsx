@@ -11,18 +11,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import api from '../api/axios';
 import { useSnackbar } from '../contexts/snackbar.context';
-
-type Client = {
-  id_client: number;
-  name: string;
-  email: string;
-  phone: string;
-  document: string;
-  cep: string;
-  street: string;
-  number: number;
-  complement?: string;
-};
+import type { Client } from '../models/client.interface';
 
 type ViaCepResponse = {
   logradouro: string;
