@@ -28,28 +28,25 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
     setOpen(false);
   };
 
-  const processError = (err) => {
+  const processMessage = (err) => {
     if (err instanceof AxiosError) {
       return err.response?.data?.message || err.message || 'Erro inesperado';
-    }
-    if (err instanceof String) {
-      return err;
     }
 
     if (err.message) {
       return err.message;
     }
 
-    return 'Erro inesperado';
+    return err || 'Erro inesperado';
   };
 
   return (
     <SnackbarContext.Provider
       value={{
-        success: (msg) => showSnackbar('success', processError(msg)),
-        error: (msg) => showSnackbar('error', processError(msg)),
-        warning: (msg) => showSnackbar('warning', processError(msg)),
-        info: (msg) => showSnackbar('info', processError(msg)),
+        success: (msg) => showSnackbar('success', processMessage(msg)),
+        error: (msg) => showSnackbar('error', processMessage(msg)),
+        warning: (msg) => showSnackbar('warning', processMessage(msg)),
+        info: (msg) => showSnackbar('info', processMessage(msg)),
       }}>
       {children}
 

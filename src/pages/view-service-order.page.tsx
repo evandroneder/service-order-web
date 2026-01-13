@@ -13,7 +13,7 @@ import {
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { serviceOrderService } from '../api/service-order.service';
 import { ClientInfo } from '../components/client-info';
 import type { ServiceOrder } from '../models/service-order.interface';
@@ -24,6 +24,7 @@ import moment from 'moment';
 ========================= */
 
 export function ViewServiceOrderPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const pdfRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +48,10 @@ export function ViewServiceOrderPage() {
     (acc, item) => acc + item.value,
     0,
   );
+
+  function handleEdit() {
+    navigate('/service-orders/edit/' + serviceOrder.id_service_order);
+  }
 
   async function handleGeneratePDF() {
     if (!pdfRef.current) return;
@@ -162,6 +167,15 @@ export function ViewServiceOrderPage() {
         </Box>
 
         {/* FOOTER */}
+        <Box
+          sx={{ p: 4, width: '100%' }}
+          display="flex"
+          justifyContent="flex-end"
+          mt={3}>
+          <Button variant="contained" onClick={handleEdit}>
+            Editar
+          </Button>
+        </Box>
         <Box
           sx={{ p: 4, width: '100%' }}
           display="flex"

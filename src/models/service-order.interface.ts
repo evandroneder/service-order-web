@@ -16,5 +16,5 @@ export interface ServiceOrder {
   company: Company;
   description: string;
   code: string;
-  id_service_irder: number;
+  id_service_order: number;
 }

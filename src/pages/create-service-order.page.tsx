@@ -13,13 +13,16 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import api from '../api/axios';
 import { serviceOrderService } from '../api/service-order.service';
 import { ClientInfo } from '../components/client-info';
 import type { Company } from '../models/company.interface';
-import type { ServiceOrderItem } from '../models/service-order.interface';
+import type {
+  ServiceOrder,
+  ServiceOrderItem,
+} from '../models/service-order.interface';
 import { useSnackbar } from '../contexts/snackbar.context';
 
 /* =========================
@@ -66,6 +69,7 @@ const emptyRow: ServiceOrderItem = {
 export function ServiceOrderPage() {
   const { id } = useParams();
   const snackbar = useSnackbar();
+  const navigate = useNavigate();
 
   const [description, setDescription] = useState('');
   const [company, setCompany] = useState(null);
@@ -181,12 +185,27 @@ export function ServiceOrderPage() {
         })),
     };
     if (id) {
-      await serviceOrderService
-        .update(id, payload)
-        .catch((e) => snackbar.error(e));
-      return;
+      try {
+        const response = await serviceOrderService.update(id, payload);
+        snackbar.success('Atualizado com sucesso.');
+
+        navigate('/service-orders/view/' + response.data.id_service_order);
+      } catch (e) {
+        snackbar.error(e);
+      }
+    } else {
+      try {
+        const response = await serviceOrderService.create<ServiceOrder>(
+          payload,
+        );
+
+        snackbar.success('OS ' + response.data.code + ' criada com sucesso.');
+
+        navigate('/service-orders/view/' + response.data.id_service_order);
+      } catch (e) {
+        snackbar.error(e);
+      }
     }
-    await serviceOrderService.create(payload).catch((e) => snackbar.error(e));
   }
 
   /* =========================
@@ -321,7 +340,7 @@ export function ServiceOrderPage() {
         <Box display="flex" flex="1">
           <Box display="flex" justifyContent="flex-end" marginTop={2} flex={1}>
             <Button variant="contained" onClick={createServiceOrder}>
-              Efetivar
+              {id ? 'Atualizar' : 'Efetivar'}
             </Button>
           </Box>
         </Box>

@@ -2,8 +2,8 @@ import type { ServiceOrder } from '../models/service-order.interface';
 import api from './axios';
 
 export const serviceOrderService = {
-  async create(payload) {
-    return await api.post('/service-order', payload);
+  async create<T>(payload) {
+    return await api.post<T>('/service-order', payload);
   },
   async update(id, payload) {
     return await api.patch(`/service-order/${id}`, payload);

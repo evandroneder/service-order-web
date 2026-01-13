@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../api/axios';
 import type { User } from '../models/user.interface';
 import { AuthTokenService } from '../api/auth.service';
+import { useSnackbar } from '../contexts/snackbar.context';
 
 type AuthContextData = {
   accessToken: string | null;
@@ -19,6 +20,7 @@ interface AuthResponse {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const snackbar = useSnackbar();
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(
     localStorage.getItem('accessToken'),
@@ -40,15 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function login(username: string, password: string) {
-    const response = await api.post<AuthResponse>('/login', {
-      username,
-      password,
-    });
+    try {
+      const response = await api.post<AuthResponse>('/login', {
+        username,
+        password,
+      });
 
-    localStorage.setItem('accessToken', response.data.accessToken);
-    AuthTokenService.setTokens(response.data);
-    setAccessToken(response.data.accessToken);
-    setUser(response.data.user);
+      localStorage.setItem('accessToken', response.data.accessToken);
+      AuthTokenService.setTokens(response.data);
+      setAccessToken(response.data.accessToken);
+      setUser(response.data.user);
+    } catch (e) {
+      snackbar.error(e);
+    }
   }
 
   function logout() {
