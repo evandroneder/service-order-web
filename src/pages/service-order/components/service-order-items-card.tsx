@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import type { ServiceOrderItem } from '../models/service-order.interface';
+import type { ServiceOrderItem } from '../../../core/models/service-order.interface';
 
 type Props = {
   items: ServiceOrderItem[];

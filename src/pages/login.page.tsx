@@ -1,6 +1,6 @@
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useAuth } from '../auth/auth.context';
+import { useAuth } from '../core/auth/auth.context';
 
 export function LoginPage() {
   const { login } = useAuth();

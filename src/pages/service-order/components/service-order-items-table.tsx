@@ -8,7 +8,7 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
-import type { ServiceOrderItem } from '../models/service-order.interface';
+import type { ServiceOrderItem } from '../../../core/models/service-order.interface';
 
 /* =========================
    TYPES

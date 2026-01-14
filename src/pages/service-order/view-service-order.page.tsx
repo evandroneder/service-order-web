@@ -14,10 +14,10 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { serviceOrderService } from '../api/service-order.service';
-import { ClientInfo } from '../components/client-info';
-import type { ServiceOrder } from '../models/service-order.interface';
-import { generateServiceOrderPDF } from '../pdf/generate-service-order';
+import { OrderService } from '../../core/api/service-order.service';
+import type { ServiceOrder } from '../../core/models/service-order.interface';
+import { generateServiceOrderPDF } from '../../core/pdf/generate-service-order';
+import { ClientInfo } from './components/client-info';
 
 /* =========================
    PAGE
@@ -33,7 +33,7 @@ export function ViewServiceOrderPage() {
 
   useEffect(() => {
     async function loadServiceOrder() {
-      const { data } = await serviceOrderService.find(id);
+      const { data } = await OrderService.find(id);
 
       setServiceOrder(data);
     }

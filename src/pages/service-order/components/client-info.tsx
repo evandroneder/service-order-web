@@ -12,11 +12,11 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import api from '../api/axios';
-import { useDialog } from '../contexts/dialog.context';
-import { useSnackbar } from '../contexts/snackbar.context';
-import type { Client } from '../models/client.interface';
-import { CreateClientModal } from './create-client-modal';
+import { ClientService } from '../../../core/api/client.service';
+import { useDialog } from '../../../core/contexts/dialog.context';
+import { useSnackbar } from '../../../core/contexts/snackbar.context';
+import type { Client } from '../../../core/models/client.interface';
+import { CreateClientModal } from '../../../core/ui/modals/create-client-modal';
 
 interface ClientInfoProps {
   client?: Client | null;
@@ -45,9 +45,7 @@ export function ClientInfo({
     if (!document) return;
 
     try {
-      const result = await api.get<Client>(
-        `/client/by-document?document=${document}`,
-      );
+      const result = await ClientService.get(document);
       setClient(result.data);
     } catch (e) {
       snackbar.error('Cliente não encontrado');

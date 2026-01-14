@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthTokenService } from './auth.service';
+import { AuthService } from './auth.service';
 
 let isRefreshing = false;
 let failedQueue: any[] = [];
@@ -18,7 +18,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = AuthTokenService.getAccessToken();
+  const token = AuthService.getAccessToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -46,14 +46,14 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = AuthTokenService.getRefreshToken();
+        const refreshToken = AuthService.getRefreshToken();
 
         const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/refresh`,
           { refreshToken },
         );
 
-        AuthTokenService.setTokens({
+        AuthService.setTokens({
           accessToken: response.data.accessToken,
         });
 
@@ -64,7 +64,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        AuthTokenService.clearTokens();
+        AuthService.clearTokens();
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

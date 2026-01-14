@@ -1,4 +1,4 @@
-import type { ServiceOrder } from '../models/service-order.interface';
+import type { ServiceOrder } from '../core/models/service-order.interface';
 
 export function serviceOrderPdfTemplate(order: ServiceOrder): string {
   const items = order.products

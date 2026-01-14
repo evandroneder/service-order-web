@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import api from '../api/axios';
-import type { User } from '../models/user.interface';
-import { AuthTokenService } from '../api/auth.service';
+import { AuthService } from '../api/auth.service';
 import { useSnackbar } from '../contexts/snackbar.context';
+import type { User } from '../models/user.interface';
 
 type AuthContextData = {
   accessToken: string | null;
@@ -10,12 +9,6 @@ type AuthContextData = {
   login: (username: string, password: string) => void;
   logout: () => void;
 };
-
-interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-}
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
@@ -32,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await api.get<User>('/me');
+      const response = await AuthService.me();
       setUser(response.data);
     } catch (e) {
       console.error(e);
@@ -43,13 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(username: string, password: string) {
     try {
-      const response = await api.post<AuthResponse>('/login', {
-        username,
-        password,
-      });
+      const response = await AuthService.login(username, password);
 
       localStorage.setItem('accessToken', response.data.accessToken);
-      AuthTokenService.setTokens(response.data);
+      AuthService.setTokens(response.data);
       setAccessToken(response.data.accessToken);
       setUser(response.data.user);
     } catch (e) {

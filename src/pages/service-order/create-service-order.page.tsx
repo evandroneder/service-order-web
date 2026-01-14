@@ -10,17 +10,16 @@ import {
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
-import api from '../api/axios';
-import { serviceOrderService } from '../api/service-order.service';
-import { ClientInfo } from '../components/client-info';
-import { ServiceOrderItemsCards } from '../components/service-order-items-card';
-import { ServiceOrderItemsTable } from '../components/service-order-items-table';
-import { useSnackbar } from '../contexts/snackbar.context';
-import type { Company } from '../models/company.interface';
+import { CompanyService } from '../../core/api/company.service';
+import { OrderService } from '../../core/api/service-order.service';
+import { useSnackbar } from '../../core/contexts/snackbar.context';
 import type {
   ServiceOrder,
   ServiceOrderItem,
-} from '../models/service-order.interface';
+} from '../../core/models/service-order.interface';
+import { ClientInfo } from './components/client-info';
+import { ServiceOrderItemsCards } from './components/service-order-items-card';
+import { ServiceOrderItemsTable } from './components/service-order-items-table';
 
 /* =========================
    INITIAL ROW
@@ -58,7 +57,7 @@ export function ServiceOrderPage() {
   useEffect(() => {
     if (id) {
       async function loadServiceOrder() {
-        const { data } = await serviceOrderService.find(id);
+        const { data } = await OrderService.find(id);
 
         setDescription(data.description);
         setCompany(data.company);
@@ -84,7 +83,7 @@ export function ServiceOrderPage() {
       loadServiceOrder();
     } else {
       const getCompanies = async () => {
-        const result = await api.get<Company[]>('/companies');
+        const result = await CompanyService.findAll();
 
         if (result.data.length > 0) {
           setCompany(result.data[0]);
@@ -160,7 +159,7 @@ export function ServiceOrderPage() {
     };
     if (id) {
       try {
-        const response = await serviceOrderService.update(id, payload);
+        const response = await OrderService.update(id, payload);
         snackbar.success('Atualizado com sucesso.');
 
         navigate('/service-orders/view/' + response.data.id_service_order);
@@ -169,9 +168,7 @@ export function ServiceOrderPage() {
       }
     } else {
       try {
-        const response = await serviceOrderService.create<ServiceOrder>(
-          payload,
-        );
+        const response = await OrderService.create<ServiceOrder>(payload);
 
         snackbar.success('OS ' + response.data.code + ' criada com sucesso.');
 

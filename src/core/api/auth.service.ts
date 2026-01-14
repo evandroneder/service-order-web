@@ -1,7 +1,11 @@
+import type { AuthResponse } from '../models/auth.interface';
+import type { User } from '../models/user.interface';
+import api from './axios';
+
 let accessToken: string | null = localStorage.getItem('accessToken');
 let refreshToken: string | null = null;
 
-export const AuthTokenService = {
+export const AuthService = {
   setTokens(tokens: { accessToken: string; refreshToken?: string }) {
     accessToken = tokens.accessToken;
     if (tokens.refreshToken) {
@@ -20,5 +24,14 @@ export const AuthTokenService = {
 
   getRefreshToken() {
     return refreshToken;
+  },
+  login(username, password) {
+    return api.post<AuthResponse>('/login', {
+      username,
+      password,
+    });
+  },
+  me() {
+    return api.get<User>('/me');
   },
 };

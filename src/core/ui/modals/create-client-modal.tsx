@@ -4,14 +4,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Stack,
+  TextField,
 } from '@mui/material';
-import { useState } from 'react';
 import axios from 'axios';
-import api from '../api/axios';
-import { useSnackbar } from '../contexts/snackbar.context';
-import type { Client } from '../models/client.interface';
+import { useState } from 'react';
+import { ClientService } from '../../api/client.service';
+import { useSnackbar } from '../../contexts/snackbar.context';
+import type { Client } from '../../models/client.interface';
 
 type ViaCepResponse = {
   logradouro: string;
@@ -64,7 +64,7 @@ export function CreateClientModal({ onClose, onConfirm }: Props) {
 
   async function handleSave() {
     try {
-      const result = await api.post('/client', form);
+      const result = await ClientService.create(form);
       onConfirm?.(result.data);
     } catch (e) {
       snackbar.error(e);

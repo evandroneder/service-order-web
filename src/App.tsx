@@ -1,11 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { PrivateRoute } from './auth/private-route';
-import { PublicRoute } from './auth/public-route';
-import { DefaultLayout } from './layouts/default.layout';
-import { ServiceOrderPage } from './pages/create-service-order.page';
-import { ServiceOrderListPage } from './pages/list-service-order.page';
+import { PrivateRoute } from './core/auth/private-route';
+import { PublicRoute } from './core/auth/public-route';
+import { DefaultLayout } from './core/layouts/default.layout';
+import { ServiceOrderPage } from './pages/service-order/create-service-order.page';
+import { ServiceOrderListPage } from './pages/service-order/list-service-order.page';
 import { LoginPage } from './pages/login.page';
-import { ViewServiceOrderPage } from './pages/view-service-order.page';
+import { ViewServiceOrderPage } from './pages/service-order/view-service-order.page';
 
 function App() {
   return (

@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { serviceOrderService } from '../api/service-order.service';
+import { OrderService } from '../../core/api/service-order.service';
 
 /* =========================
    TYPES (DTO)
@@ -39,7 +39,7 @@ export function ServiceOrderListPage() {
   useEffect(() => {
     async function loadOrders() {
       setLoading(true);
-      const { data } = await serviceOrderService.findAll();
+      const { data } = await OrderService.findAll();
       setOrders(data);
       setLoading(false);
     }
