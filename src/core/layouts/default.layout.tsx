@@ -84,7 +84,7 @@ export function DefaultLayout() {
       </Drawer>
 
       {/* CONTENT */}
-      <Box flex={1} p={3}>
+      <Box flex={1} p={isMobile ? 1 : 3}>
         <Outlet />
       </Box>
     </Box>

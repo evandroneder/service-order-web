@@ -2,7 +2,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
-  Container,
   IconButton,
   Table,
   TableBody,
@@ -56,8 +55,8 @@ export function ServiceOrderListPage() {
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mb: 4, mt: 4 }}>
+    <Box>
+      <Box>
         <Typography variant="h4">Ordens de Serviço</Typography>
       </Box>
 
@@ -205,6 +204,6 @@ export function ServiceOrderListPage() {
           </TableBody>
         </Table>
       </Box>
-    </Container>
+    </Box>
   );
 }

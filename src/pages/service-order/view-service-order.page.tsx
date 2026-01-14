@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   Divider,
   Table,
   TableBody,
@@ -66,9 +65,9 @@ export function ViewServiceOrderPage() {
 
   const imgConfig = isMobile ? 80 : 160;
   return (
-    <Container maxWidth={'md'}>
+    <Box maxWidth={'md'}>
       <Box sx={{ width: '100%' }}>
-        <Box sx={{ p: 4, width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           {/* HEADER */}
           {serviceOrder.company && (
             <Box
@@ -158,7 +157,7 @@ export function ViewServiceOrderPage() {
         {/* FOOTER */}
 
         <Box
-          sx={{ p: 4, width: '100%', gap: 1 }}
+          sx={{ width: '100%', gap: 1 }}
           display="flex"
           justifyContent="flex-end"
           mt={3}>
@@ -173,6 +172,6 @@ export function ViewServiceOrderPage() {
           </Button>
         </Box>
       </Box>
-    </Container>
+    </Box>
   );
 }
