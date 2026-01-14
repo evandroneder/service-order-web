@@ -1,16 +1,11 @@
-import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
   Divider,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,36 +13,14 @@ import { v4 as uuid } from 'uuid';
 import api from '../api/axios';
 import { serviceOrderService } from '../api/service-order.service';
 import { ClientInfo } from '../components/client-info';
+import { ServiceOrderItemsCards } from '../components/service-order-items-card';
+import { ServiceOrderItemsTable } from '../components/service-order-items-table';
+import { useSnackbar } from '../contexts/snackbar.context';
 import type { Company } from '../models/company.interface';
 import type {
   ServiceOrder,
   ServiceOrderItem,
 } from '../models/service-order.interface';
-import { useSnackbar } from '../contexts/snackbar.context';
-
-/* =========================
-   TYPES
-========================= */
-
-type Column = {
-  key: keyof ServiceOrderItem;
-  label: string;
-  width?: number;
-  type?: 'text' | 'number';
-  disabled?: boolean;
-};
-
-/* =========================
-   COLUMNS CONFIG
-========================= */
-
-const columns: Column[] = [
-  { key: 'quantity', label: 'Qtd', width: 100, type: 'number' },
-  { key: 'description', label: 'Descrição', type: 'text' },
-  { key: 'value', label: 'Valor Unit.', width: 120, type: 'number' },
-  // { key: 'discount', label: 'Desconto', width: 120, type: 'number' },
-  { key: 'total', label: 'Total', width: 120, type: 'number', disabled: true },
-];
 
 /* =========================
    INITIAL ROW
@@ -70,6 +43,8 @@ export function ServiceOrderPage() {
   const { id } = useParams();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [description, setDescription] = useState('');
   const [company, setCompany] = useState(null);
@@ -216,19 +191,24 @@ export function ServiceOrderPage() {
      RENDER
   ========================= */
 
+  const imgConfig = isMobile ? 80 : 160;
+
   return (
-    <Box sx={{ mb: 6 }} justifyContent="center" display="flex">
-      <Box sx={{ mb: 6, maxWidth: '900px' }}>
-        <Box sx={{ p: 4 }}>
+    <Box justifyContent="center" display="flex">
+      <Box sx={{ maxWidth: '900px' }}>
+        <Box>
           {/* HEADER */}
           {company && (
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
               <Box>
                 <img
                   src={company.logo_url}
                   alt="Logo"
-                  height={220}
-                  width={220}
+                  height={imgConfig}
+                  width={imgConfig}
                   style={{ borderRadius: '50%' }}
                 />
               </Box>
@@ -269,51 +249,19 @@ export function ServiceOrderPage() {
             Itens do Serviço
           </Typography>
 
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableCell key={col.key} width={col.width}>
-                    {col.label}
-                  </TableCell>
-                ))}
-                <TableCell width={40} />
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {items.map((row) => (
-                <TableRow key={row.id}>
-                  {columns.map((col) => (
-                    <TableCell key={col.key}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        type={col.type}
-                        disabled={col.disabled}
-                        value={row[col.key]}
-                        onChange={(e) =>
-                          updateItem(
-                            row.id,
-                            col.key,
-                            col.type === 'number'
-                              ? Number(e.target.value)
-                              : e.target.value,
-                          )
-                        }
-                      />
-                    </TableCell>
-                  ))}
-
-                  <TableCell>
-                    <IconButton onClick={() => removeRow(row.id)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {isMobile ? (
+            <ServiceOrderItemsCards
+              items={items}
+              updateItem={updateItem}
+              removeRow={removeRow}
+            />
+          ) : (
+            <ServiceOrderItemsTable
+              items={items}
+              updateItem={updateItem}
+              removeRow={removeRow}
+            />
+          )}
 
           <Button onClick={addRow} sx={{ mt: 2 }}>
             Adicionar Item

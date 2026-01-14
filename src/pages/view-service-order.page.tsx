@@ -9,15 +9,15 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { serviceOrderService } from '../api/service-order.service';
 import { ClientInfo } from '../components/client-info';
 import type { ServiceOrder } from '../models/service-order.interface';
-import moment from 'moment';
+import { generateServiceOrderPDF } from '../pdf/generate-service-order';
 
 /* =========================
    PAGE
@@ -26,7 +26,8 @@ import moment from 'moment';
 export function ViewServiceOrderPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const pdfRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [serviceOrder, setServiceOrder] = useState<ServiceOrder | null>(null);
 
@@ -54,43 +55,31 @@ export function ViewServiceOrderPage() {
   }
 
   async function handleGeneratePDF() {
-    if (!pdfRef.current) return;
+    if (!serviceOrder) return;
 
-    const canvas = await html2canvas(pdfRef.current, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-    const fileName = serviceOrder.client.name.replaceAll(' ', '_');
-    const today = moment().format('DD/MM/YYYY');
-    pdf.save(`${fileName}_${today}_OS.pdf`);
+    await generateServiceOrderPDF(serviceOrder);
   }
 
   /* =========================
      RENDER
   ========================= */
 
+  const imgConfig = isMobile ? 80 : 160;
   return (
-    <Container maxWidth={'md'} sx={{ mb: 6 }}>
+    <Container maxWidth={'md'}>
       <Box sx={{ width: '100%' }}>
-        <Box sx={{ p: 4, width: '100%' }} ref={pdfRef}>
+        <Box sx={{ p: 4, width: '100%' }}>
           {/* HEADER */}
           {serviceOrder.company && (
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
               <img
                 src={serviceOrder.company.logo_url}
                 alt="Logo"
-                height={160}
-                width={160}
+                height={imgConfig}
+                width={imgConfig}
                 style={{ borderRadius: '50%' }}
               />
 

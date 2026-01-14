@@ -1,26 +1,44 @@
-import { Box, Button, Divider, TextField, Typography } from '@mui/material';
+/* eslint-disable react-hooks/set-state-in-effect */
+import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
+import SearchIcon from '@mui/icons-material/Search';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import {
+  Box,
+  Button,
+  Divider,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { useDialog } from '../contexts/dialog.context';
 import { useSnackbar } from '../contexts/snackbar.context';
-import { CreateClientModal } from './create-client-modal';
 import type { Client } from '../models/client.interface';
+import { CreateClientModal } from './create-client-modal';
 
-export function ClientInfo(props) {
+interface ClientInfoProps {
+  client?: Client | null;
+  hideChange?: boolean;
+}
+
+export function ClientInfo({
+  client: initialClient,
+  hideChange,
+}: ClientInfoProps) {
   const [document, setDocument] = useState('');
-  const [client, setClient] = useState<Client | null>(props.client);
-  const [hideChange] = useState(props.hideChange);
+  const [client, setClient] = useState<Client | null>(initialClient || null);
   const { openDialog } = useDialog();
   const snackbar = useSnackbar();
 
   useEffect(() => {
-    setClient(props.client);
-  }, [props]);
+    setClient(initialClient || null);
+  }, [initialClient]);
 
   async function handleAddClient() {
-    const client = await openDialog<Client>(<CreateClientModal />);
-
-    setClient(client);
+    const newClient = await openDialog<Client>(<CreateClientModal />);
+    if (newClient) setClient(newClient);
   }
 
   async function handleSearchClient() {
@@ -32,7 +50,7 @@ export function ClientInfo(props) {
       );
       setClient(result.data);
     } catch (e) {
-      snackbar.error(e);
+      snackbar.error('Cliente não encontrado');
       console.error(e);
     }
   }
@@ -43,57 +61,94 @@ export function ClientInfo(props) {
   }
 
   return (
-    <>
-      <Typography variant="h6" gutterBottom>
-        Dados do Cliente
-      </Typography>
+    <Box>
+      {/* SEARCH / ADD */}
+      {!client && (
+        <Stack spacing={2}>
+          <Typography variant="subtitle1">Buscar cliente</Typography>
 
-      {!client ? (
-        <Box display="flex" gap={2} alignItems="center">
-          <TextField
-            label="CPF do Cliente"
-            value={document}
-            onChange={(e) => setDocument(e.target.value)}
-          />
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems="center">
+            <TextField
+              fullWidth
+              label="CPF do Cliente"
+              value={document}
+              onChange={(e) => setDocument(e.target.value)}
+            />
 
-          <Button variant="contained" onClick={handleSearchClient}>
-            Buscar
-          </Button>
+            <Button
+              variant="contained"
+              startIcon={<SearchIcon />}
+              onClick={handleSearchClient}>
+              Buscar
+            </Button>
 
-          <Button variant="outlined" onClick={handleAddClient}>
-            Adicionar cliente
-          </Button>
-        </Box>
-      ) : (
-        <Box>
-          <Box>
-            <Typography>Nome: {client.name}</Typography>
-            <Typography>Documento: {client.document}</Typography>
-            <Typography>Telefone: {client.phone}</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddClient}>
+              Adicionar
+            </Button>
+          </Stack>
+        </Stack>
+      )}
 
-            {!hideChange && (
-              <Button sx={{ mt: 2 }} size="small" onClick={handleChangeClient}>
-                Alterar cliente
-              </Button>
-            )}
+      {/* CLIENT INFO */}
+      {client && (
+        <Stack spacing={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <PersonIcon color="primary" />
+            <Typography variant="subtitle1">Dados do Cliente</Typography>
           </Box>
 
-          <Divider sx={{ my: 4 }} />
+          <Divider />
+
+          <Stack spacing={1}>
+            <Typography>
+              <strong>Nome:</strong> {client.name}
+            </Typography>
+
+            <Typography>
+              <strong>Documento:</strong> {client.document}
+            </Typography>
+
+            <Typography>
+              <strong>Telefone:</strong> {client.phone}
+            </Typography>
+          </Stack>
+
+          {!hideChange && (
+            <Box>
+              <Button
+                size="small"
+                startIcon={<SwapHorizIcon />}
+                onClick={handleChangeClient}>
+                Alterar cliente
+              </Button>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 2 }} />
 
           {/* SIGNATURE */}
-          <Typography variant="body2" gutterBottom>
-            Assinatura do Cliente
-          </Typography>
+          <Box>
+            <Typography variant="body2" gutterBottom>
+              Assinatura do Cliente
+            </Typography>
 
-          <Box
-            sx={{
-              borderBottom: '1px solid #000',
-              height: 40,
-              width: '100%',
-            }}
-          />
-        </Box>
+            <Box
+              sx={{
+                borderBottom: '1px solid',
+                borderColor: 'text.primary',
+                height: 40,
+                width: '100%',
+              }}
+            />
+          </Box>
+        </Stack>
       )}
-    </>
+    </Box>
   );
 }
