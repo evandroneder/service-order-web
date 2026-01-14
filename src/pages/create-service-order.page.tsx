@@ -53,11 +53,6 @@ export function ServiceOrderPage() {
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
   ]);
 
   useEffect(() => {
