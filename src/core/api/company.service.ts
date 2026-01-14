@@ -13,6 +13,6 @@ export const CompanyService = {
   },
 
   async findAll() {
-    return await api.get('/companiess');
+    return await api.get('/companies');
   },
 };
