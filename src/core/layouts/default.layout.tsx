@@ -14,10 +14,12 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/auth.context';
 
 export function DefaultLayout() {
+  const auth = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -31,7 +33,15 @@ export function DefaultLayout() {
   const menuItems = [
     { label: 'Ordens de Serviço', path: '/' },
     { label: 'Nova OS', path: '/service-orders/new' },
+    { label: 'Logout', path: '/login', execute: () => auth.logout() },
   ];
+
+  const handleClickItem = async (item) => {
+    if (item.execute) {
+      await item.execute();
+    }
+    handleNavigate(item.url);
+  };
 
   return (
     <Box minHeight="100vh" display="flex" flexDirection="column">
@@ -57,7 +67,7 @@ export function DefaultLayout() {
               <Button
                 key={item.path}
                 color="inherit"
-                onClick={() => navigate(item.path)}>
+                onClick={() => handleClickItem(item)}>
                 {item.label}
               </Button>
             ))}
@@ -74,7 +84,7 @@ export function DefaultLayout() {
           <List>
             {menuItems.map((item) => (
               <ListItem key={item.path} disablePadding>
-                <ListItemButton onClick={() => handleNavigate(item.path)}>
+                <ListItemButton onClick={() => handleClickItem(item)}>
                   <ListItemText primary={item.label} />
                 </ListItemButton>
               </ListItem>

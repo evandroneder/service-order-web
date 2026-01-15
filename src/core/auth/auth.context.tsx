@@ -36,7 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await AuthService.logout();
+    } catch {
+      /* empty */
+    }
     localStorage.removeItem(StorageEnum.ACCESS_TOKEN);
     setUser(null);
     setAccessToken(null);

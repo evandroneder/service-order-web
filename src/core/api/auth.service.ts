@@ -28,4 +28,7 @@ export const AuthService = {
   me() {
     return api.get<User>('/me');
   },
+  logout() {
+    return api.post('/logout');
+  },
 };

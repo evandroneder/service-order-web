@@ -15,6 +15,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '127.0.0.0:3000',
+  withCredentials: true
 });
 
 api.interceptors.request.use((config) => {
