@@ -10,8 +10,8 @@ import {
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
-import { CompanyService } from '../../core/api/company.service';
 import { OrderService } from '../../core/api/service-order.service';
+import { useCompany } from '../../core/contexts/compnay.context';
 import { useSnackbar } from '../../core/contexts/snackbar.context';
 import type {
   ServiceOrder,
@@ -20,7 +20,6 @@ import type {
 import { ClientInfo } from './components/client-info';
 import { ServiceOrderItemsCards } from './components/service-order-items-card';
 import { ServiceOrderItemsTable } from './components/service-order-items-table';
-import { useCompany } from '../../core/contexts/compnay.context';
 
 /* =========================
    INITIAL ROW
@@ -86,15 +85,6 @@ export function ServiceOrderPage() {
       }
 
       loadServiceOrder();
-    } else {
-      const getCompanies = async () => {
-        const result = await CompanyService.findAll();
-
-        if (result.data.length > 0) {
-          setCompany(result.data[0]);
-        }
-      };
-      getCompanies();
     }
   }, [id]);
 
