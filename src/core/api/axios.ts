@@ -46,11 +46,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = AuthService.getRefreshToken();
-
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/refresh`,
-          { refreshToken },
+          `${import.meta.env.VITE_API_URL}/refresh-token`,
+          {},
+          { withCredentials: true },
         );
 
         AuthService.setTokens({

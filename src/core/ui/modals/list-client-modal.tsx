@@ -75,7 +75,9 @@ export function ListClientModal({ onConfirm, name: clientName }: Props) {
         display="flex"
         alignItems="center"
         justifyContent="space-between">
-        <Typography variant="h6">Selecionar Cliente</Typography>
+        <Typography>
+          <strong>Selecionar Cliente</strong>
+        </Typography>
 
         <IconButton onClick={() => onConfirm(null)}>
           <CloseIcon />

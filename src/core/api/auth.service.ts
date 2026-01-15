@@ -4,19 +4,14 @@ import type { User } from '../models/user.interface';
 import api from './axios';
 
 let accessToken: string | null = localStorage.getItem(StorageEnum.ACCESS_TOKEN);
-let refreshToken: string | null = null;
 
 export const AuthService = {
-  setTokens(tokens: { accessToken: string; refreshToken?: string }) {
+  setTokens(tokens: { accessToken: string }) {
     accessToken = tokens.accessToken;
-    if (tokens.refreshToken) {
-      refreshToken = tokens.refreshToken;
-    }
   },
 
   clearTokens() {
     accessToken = null;
-    refreshToken = null;
     localStorage.clear();
   },
 
@@ -24,9 +19,6 @@ export const AuthService = {
     return accessToken;
   },
 
-  getRefreshToken() {
-    return refreshToken;
-  },
   login(username, password) {
     return api.post<AuthResponse>('/login', {
       username,
