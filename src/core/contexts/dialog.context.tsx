@@ -10,6 +10,11 @@ type DialogContextType = {
   openDialog: <T>(component: React.ReactNode) => Promise<T>;
 };
 
+export type DialogProps = {
+  onClose?: () => void;
+  onConfirm?: (data) => void;
+};
+
 const DialogContext = createContext({} as DialogContextType);
 
 export function DialogProvider({ children }: { children: React.ReactNode }) {

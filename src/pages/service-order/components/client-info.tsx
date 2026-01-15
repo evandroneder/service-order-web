@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import AddIcon from '@mui/icons-material/Add';
+import { AddCircleOutline } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -17,6 +17,7 @@ import { useDialog } from '../../../core/contexts/dialog.context';
 import { useSnackbar } from '../../../core/contexts/snackbar.context';
 import type { Client } from '../../../core/models/client.interface';
 import { CreateClientModal } from '../../../core/ui/modals/create-client-modal';
+import { ListClientModal } from '../../../core/ui/modals/list-client-modal';
 
 interface ClientInfoProps {
   client?: Client | null;
@@ -28,6 +29,7 @@ export function ClientInfo({
   hideChange,
 }: ClientInfoProps) {
   const [document, setDocument] = useState('');
+  const [name, setName] = useState('');
   const [client, setClient] = useState<Client | null>(initialClient || null);
   const { openDialog } = useDialog();
   const snackbar = useSnackbar();
@@ -53,6 +55,13 @@ export function ClientInfo({
     }
   }
 
+  async function handleSearchClientByName() {
+    const clientSelected = await openDialog<Client>(
+      <ListClientModal name={name} />,
+    );
+    if (clientSelected) setClient(clientSelected);
+  }
+
   function handleChangeClient() {
     setClient(null);
     setDocument('');
@@ -64,32 +73,56 @@ export function ClientInfo({
       {!client && (
         <Stack spacing={2}>
           <Typography variant="subtitle1">Buscar cliente</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
+            <Stack
+              flex={1}
+              direction={{ xs: 'column', sm: 'column' }}
+              spacing={2}>
+              <TextField
+                fullWidth
+                label="Nome do Cliente"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Stack alignItems="flex-end" gap={2}>
+                <Button
+                  variant="contained"
+                  startIcon={<SearchIcon />}
+                  onClick={handleSearchClientByName}>
+                  Buscar
+                </Button>
+              </Stack>
+            </Stack>
 
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems="center">
-            <TextField
-              fullWidth
-              label="CPF do Cliente"
-              value={document}
-              onChange={(e) => setDocument(e.target.value)}
-            />
+            <Stack
+              flex={1}
+              direction={{ xs: 'column', sm: 'column' }}
+              spacing={2}>
+              <TextField
+                fullWidth
+                label="CPF do Cliente"
+                value={document}
+                onChange={(e) => setDocument(e.target.value)}
+              />
+              <Stack alignItems="flex-end" gap={2}>
+                <Button
+                  variant="contained"
+                  startIcon={<SearchIcon />}
+                  onClick={handleSearchClient}>
+                  Buscar
+                </Button>
 
-            <Button
-              variant="contained"
-              startIcon={<SearchIcon />}
-              onClick={handleSearchClient}>
-              Buscar
-            </Button>
-
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddClient}>
-              Adicionar
-            </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  onClick={handleAddClient}>
+                  Adicionar
+                </Button>
+              </Stack>
+            </Stack>
           </Stack>
+
+          <Divider />
         </Stack>
       )}
 

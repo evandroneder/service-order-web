@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { ClientService } from '../../api/client.service';
 import { useSnackbar } from '../../contexts/snackbar.context';
 import type { Client } from '../../models/client.interface';
+import type { DialogProps } from '../../contexts/dialog.context';
 
 type ViaCepResponse = {
   logradouro: string;
@@ -21,12 +22,7 @@ type ViaCepResponse = {
   erro?: boolean;
 };
 
-type Props = {
-  onClose?: () => void;
-  onConfirm?: (data) => void;
-};
-
-export function CreateClientModal({ onClose, onConfirm }: Props) {
+export function CreateClientModal({ onClose, onConfirm }: DialogProps) {
   const snackbar = useSnackbar();
   const [form, setForm] = useState<Omit<Client, 'id_client'>>({
     name: '',
