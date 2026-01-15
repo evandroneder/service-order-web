@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import moment from 'moment';
-import type { ServiceOrder } from '../core/models/service-order.interface';
+import type { ServiceOrder } from '../models/service-order.interface';
 import { serviceOrderPdfTemplate } from './service-order-template';
 
 // async function imageToBase64(url: string): Promise<string> {
@@ -36,7 +36,7 @@ export async function generateServiceOrderPDF(order: ServiceOrder) {
 
   const doc = iframe.contentDocument!;
   doc.open();
-  doc.write(serviceOrderPdfTemplate(order));
+  doc.writeln(serviceOrderPdfTemplate(order));
   doc.close();
 
   await new Promise((resolve) => setTimeout(resolve, 300));

@@ -147,7 +147,6 @@ export function ServiceOrderPage() {
     const payload = {
       description,
       id_client: 1,
-      id_company: company?.id_company,
       products: items
         .filter(
           (item) =>
@@ -173,11 +172,13 @@ export function ServiceOrderPage() {
       }
     } else {
       try {
-        const response = await OrderService.create<ServiceOrder>(payload);
+        const { data } = await OrderService.create<ServiceOrder>(payload);
 
-        snackbar.success('OS ' + response.data.code + ' criada com sucesso.');
+        snackbar.success(
+          'OS #' + data.id_service_order + ' criada com sucesso.',
+        );
 
-        navigate('/service-orders/view/' + response.data.id_service_order);
+        navigate('/service-orders/view/' + data.id_service_order);
       } catch (e) {
         snackbar.error(e);
       }
