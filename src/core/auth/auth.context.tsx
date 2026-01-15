@@ -1,10 +1,9 @@
-import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useState } from 'react';
 import { AuthService } from '../api/auth.service';
 import { useSnackbar } from '../contexts/snackbar.context';
 import { StorageEnum } from '../enums/storage.enum';
-import type { Jwt } from '../models/jwt.interface';
 import type { User } from '../models/user.interface';
+import { getJwtData } from './jwt-decode';
 
 type AuthContextData = {
   accessToken: string | null;
@@ -21,9 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const storagedToken = localStorage.getItem(StorageEnum.ACCESS_TOKEN);
   const [accessToken, setAccessToken] = useState<string | null>(storagedToken);
 
-  const decoded: Jwt | null = storagedToken
-    ? (jwtDecode(storagedToken) as Jwt)
-    : null;
+  const decoded = getJwtData();
   const [user, setUser] = useState<User | null>(decoded?.user);
 
   async function login(username: string, password: string) {

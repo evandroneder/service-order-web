@@ -17,6 +17,7 @@ export const AuthService = {
   clearTokens() {
     accessToken = null;
     refreshToken = null;
+    localStorage.clear();
   },
 
   getAccessToken() {
