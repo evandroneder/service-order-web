@@ -1,8 +1,9 @@
+import { StorageEnum } from '../enums/storage.enum';
 import type { AuthResponse } from '../models/auth.interface';
 import type { User } from '../models/user.interface';
 import api from './axios';
 
-let accessToken: string | null = localStorage.getItem('accessToken');
+let accessToken: string | null = localStorage.getItem(StorageEnum.ACCESS_TOKEN);
 let refreshToken: string | null = null;
 
 export const AuthService = {

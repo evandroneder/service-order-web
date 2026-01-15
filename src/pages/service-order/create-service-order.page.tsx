@@ -20,6 +20,7 @@ import type {
 import { ClientInfo } from './components/client-info';
 import { ServiceOrderItemsCards } from './components/service-order-items-card';
 import { ServiceOrderItemsTable } from './components/service-order-items-table';
+import { useCompany } from '../../core/contexts/compnay.context';
 
 /* =========================
    INITIAL ROW
@@ -40,14 +41,18 @@ const emptyRow: ServiceOrderItem = {
 
 export function ServiceOrderPage() {
   const { id } = useParams();
+  const { company: decodedCompany } = useCompany();
+
   const snackbar = useSnackbar();
   const navigate = useNavigate();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [description, setDescription] = useState('');
-  const [company, setCompany] = useState(null);
+  const [company, setCompany] = useState(decodedCompany);
   const [client, setClient] = useState(null);
+
   const [items, setItems] = useState<ServiceOrderItem[]>([
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },

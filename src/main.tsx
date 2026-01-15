@@ -6,6 +6,7 @@ import App from './App';
 import { AuthProvider } from './core/auth/auth.context';
 import { DialogProvider } from './core/contexts/dialog.context';
 import { SnackbarProvider } from './core/contexts/snackbar.context';
+import { CompanyProvider } from './core/contexts/compnay.context';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -13,9 +14,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CssBaseline />
       <SnackbarProvider>
         <AuthProvider>
-          <DialogProvider>
-            <App />
-          </DialogProvider>
+          <CompanyProvider>
+            <DialogProvider>
+              <App />
+            </DialogProvider>
+          </CompanyProvider>
         </AuthProvider>
       </SnackbarProvider>
     </ThemeProvider>

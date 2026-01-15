@@ -1,6 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { createContext, useContext, useState } from 'react';
 import { AuthService } from '../api/auth.service';
 import { useSnackbar } from '../contexts/snackbar.context';
+import { StorageEnum } from '../enums/storage.enum';
+import type { Jwt } from '../models/jwt.interface';
 import type { User } from '../models/user.interface';
 
 type AuthContextData = {
@@ -14,25 +17,14 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const snackbar = useSnackbar();
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(
-    localStorage.getItem('accessToken'),
-  );
 
-  async function loadUser() {
-    if (!accessToken) {
-      return;
-    }
+  const storagedToken = localStorage.getItem(StorageEnum.ACCESS_TOKEN);
+  const [accessToken, setAccessToken] = useState<string | null>(storagedToken);
 
-    try {
-      const response = await AuthService.me();
-      setUser(response.data);
-    } catch (e) {
-      console.error(e);
-      setUser(null);
-      setAccessToken(null);
-    }
-  }
+  const decoded: Jwt | null = storagedToken
+    ? (jwtDecode(storagedToken) as Jwt)
+    : null;
+  const [user, setUser] = useState<User | null>(decoded?.user);
 
   async function login(username: string, password: string) {
     try {
@@ -48,15 +40,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout() {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem(StorageEnum.ACCESS_TOKEN);
     setUser(null);
     setAccessToken(null);
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadUser();
-  }, []);
 
   return (
     <AuthContext.Provider value={{ user, accessToken, login, logout }}>
