@@ -9,7 +9,7 @@ type AuthContextData = {
   accessToken: string | null;
   user: User | null;
   login: (username: string, password: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);

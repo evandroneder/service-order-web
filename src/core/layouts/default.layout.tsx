@@ -18,6 +18,11 @@ import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/auth.context';
 
+interface IMenuItem {
+  label: string;
+  path: string;
+  execute?: () => Promise<void>;
+}
 export function DefaultLayout() {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -30,7 +35,7 @@ export function DefaultLayout() {
     setOpen(false);
   }
 
-  const menuItems = [
+  const menuItems: IMenuItem[] = [
     { label: 'Ordens de Serviço', path: '/' },
     { label: 'Nova OS', path: '/service-orders/new' },
     { label: 'Logout', path: '/login', execute: () => auth.logout() },
@@ -40,7 +45,7 @@ export function DefaultLayout() {
     if (item.execute) {
       await item.execute();
     }
-    handleNavigate(item.url);
+    handleNavigate(item.path);
   };
 
   return (
