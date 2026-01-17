@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { OrderService } from '../../core/api/service-order.service';
@@ -58,6 +58,8 @@ export function ServiceOrderPage() {
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
   ]);
+
+  const isEditting = useMemo(() => !!id, [id]);
 
   useEffect(() => {
     if (id) {
@@ -184,7 +186,7 @@ export function ServiceOrderPage() {
 
   return (
     <Box justifyContent="center" display="flex">
-      <Box sx={{ maxWidth: '900px' }}>
+      <Box sx={{ maxWidth: '900px', flex: 1 }}>
         <Box>
           {/* HEADER */}
           {company && (
@@ -275,7 +277,11 @@ export function ServiceOrderPage() {
 
           <Divider sx={{ my: 3 }} />
 
-          <ClientInfo client={client} onChange={(c) => setClient(c)} />
+          <ClientInfo
+            client={client}
+            hideChange={isEditting}
+            onChange={(c) => setClient(c)}
+          />
         </Box>
 
         <Box display="flex" flex="1">

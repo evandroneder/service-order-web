@@ -17,6 +17,7 @@ import { OrderService } from '../../core/api/service-order.service';
 import type { ServiceOrder } from '../../core/models/service-order.interface';
 import { generateServiceOrderPDF } from '../../core/pdf/generate-service-order';
 import { ClientInfo } from './components/client-info';
+import { formatCNPJ } from '../../core/utils/string.util';
 
 /* =========================
    PAGE
@@ -65,9 +66,9 @@ export function ViewServiceOrderPage() {
 
   const imgConfig = isMobile ? 80 : 160;
   return (
-    <Box maxWidth={'md'}>
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ width: '100%' }}>
+    <Box justifyContent="center" display="flex">
+      <Box sx={{ maxWidth: '900px', flex: 1 }}>
+        <Box>
           {/* HEADER */}
           {serviceOrder.company && (
             <Box
@@ -93,7 +94,7 @@ export function ViewServiceOrderPage() {
                   CEP: {serviceOrder.company.cep}
                 </Typography>
                 <Typography variant="body2">
-                  CNPJ: {serviceOrder.company.document}
+                  CNPJ: {formatCNPJ(serviceOrder.company.document)}
                 </Typography>
               </Box>
             </Box>

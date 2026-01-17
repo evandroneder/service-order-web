@@ -18,11 +18,12 @@ import { useSnackbar } from '../../../core/contexts/snackbar.context';
 import type { Client } from '../../../core/models/client.interface';
 import { CreateClientModal } from '../../../core/ui/modals/create-client-modal';
 import { ListClientModal } from '../../../core/ui/modals/list-client-modal';
+import { formatCPF, formatPhone } from '../../../core/utils/string.util';
 
 interface ClientInfoProps {
   client?: Client | null;
   hideChange?: boolean;
-  onChange: (c: Client | null) => void;
+  onChange?: (c: Client | null) => void;
 }
 
 export function ClientInfo({
@@ -44,7 +45,7 @@ export function ClientInfo({
     const newClient = await openDialog<Client>(<CreateClientModal />);
     if (newClient) {
       setClient(newClient);
-      onChange(newClient);
+      onChange?.(newClient);
     }
   }
 
@@ -54,7 +55,7 @@ export function ClientInfo({
     try {
       const result = await ClientService.get(document);
       setClient(result.data);
-      onChange(result.data);
+      onChange?.(result.data);
     } catch (e) {
       snackbar.error('Cliente não encontrado');
       console.error(e);
@@ -67,14 +68,14 @@ export function ClientInfo({
     );
     if (clientSelected) {
       setClient(clientSelected);
-      onChange(clientSelected);
+      onChange?.(clientSelected);
     }
   }
 
   function handleChangeClient() {
     setClient(null);
     setDocument('');
-    onChange(null);
+    onChange?.(null);
   }
 
   return (
@@ -152,11 +153,11 @@ export function ClientInfo({
             </Typography>
 
             <Typography>
-              <strong>Documento:</strong> {client.document}
+              <strong>Documento:</strong> {formatCPF(client.document)}
             </Typography>
 
             <Typography>
-              <strong>Telefone:</strong> {client.phone}
+              <strong>Telefone:</strong> {formatPhone(client.phone)}
             </Typography>
           </Stack>
 
