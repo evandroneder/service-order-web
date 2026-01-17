@@ -146,7 +146,7 @@ export function CreateClientModal({ onClose, onConfirm }: DialogProps) {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={() => onClose()}>Cancelar</Button>
         <Button variant="contained" onClick={handleSave}>
           Salvar
         </Button>

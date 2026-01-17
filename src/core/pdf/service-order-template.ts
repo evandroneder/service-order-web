@@ -1,5 +1,6 @@
 import moment from 'moment';
 import type { ServiceOrder } from '../models/service-order.interface';
+import { formatCNPJ, formatDocument } from '../utils/string.util';
 
 export function serviceOrderPdfTemplate(order: ServiceOrder): string {
   const items = order.products
@@ -150,7 +151,7 @@ table td {
   <div>
     <!-- opcional: logo -->
     <strong>${order.company?.name}</strong><br />
-    CNPJ: ${order.company?.document}
+    CNPJ: ${formatCNPJ(order.company?.document)}
   </div>
 
   <h1>Registro de Ordem de Serviço</h1>
@@ -172,9 +173,9 @@ table td {
     <div class="col"><span class="label">Nome:</span> ${
       order.client?.name
     }</div>
-    <div class="col"><span class="label">CPF/CNPJ:</span> ${
-      order.client?.document
-    }</div>
+    <div class="col"><span class="label">CPF/CNPJ:</span> ${formatDocument(
+      order.client?.document,
+    )}</div>
   </div>
 
   <div class="row">

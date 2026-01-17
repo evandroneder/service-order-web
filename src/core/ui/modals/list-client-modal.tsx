@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { ClientService } from '../../api/client.service';
 import { type DialogProps } from '../../contexts/dialog.context';
 import type { Client } from '../../models/client.interface';
-import { formatCPF, formatPhone } from '../../utils/string.util';
+import { formatDocument, formatPhone } from '../../utils/string.util';
 
 /* =========================
    MODAL
@@ -133,7 +133,7 @@ export function ListClientModal({ onConfirm, name: clientName }: Props) {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSelect(client as Client)}>
                     <TableCell>{client.name}</TableCell>
-                    <TableCell>{formatCPF(client.document)}</TableCell>
+                    <TableCell>{formatDocument(client.document)}</TableCell>
                     <TableCell>{formatPhone(client.phone)}</TableCell>
                     <TableCell align="center">
                       <Button
@@ -172,11 +172,11 @@ export function ListClientModal({ onConfirm, name: clientName }: Props) {
                 <Typography fontWeight={600}>{client.name}</Typography>
 
                 <Typography variant="body2">
-                  <strong>Documento:</strong> {client.document}
+                  <strong>Documento:</strong> {formatDocument(client.document)}
                 </Typography>
 
                 <Typography variant="body2">
-                  <strong>Telefone:</strong> {client.phone}
+                  <strong>Telefone:</strong> {formatPhone(client.phone)}
                 </Typography>
 
                 <Button

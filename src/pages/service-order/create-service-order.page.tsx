@@ -21,6 +21,7 @@ import type {
 import { ClientInfo } from './components/client-info';
 import { ServiceOrderItemsCards } from './components/service-order-items-card';
 import { ServiceOrderItemsTable } from './components/service-order-items-table';
+import { formatCEP, formatCNPJ } from '../../core/utils/string.util';
 
 /* =========================
    INITIAL ROW
@@ -209,9 +210,11 @@ export function ServiceOrderPage() {
                 <Typography variant="body2">
                   {company.street}, {company.number}
                 </Typography>
-                <Typography variant="body2">CEP: {company.cep}</Typography>
                 <Typography variant="body2">
-                  CNPJ: {company.document}
+                  CEP: {formatCEP(company.cep)}
+                </Typography>
+                <Typography variant="body2">
+                  CNPJ: {formatCNPJ(company.document)}
                 </Typography>
               </Box>
             </Box>

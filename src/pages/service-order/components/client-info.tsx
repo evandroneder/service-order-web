@@ -18,7 +18,7 @@ import { useSnackbar } from '../../../core/contexts/snackbar.context';
 import type { Client } from '../../../core/models/client.interface';
 import { CreateClientModal } from '../../../core/ui/modals/create-client-modal';
 import { ListClientModal } from '../../../core/ui/modals/list-client-modal';
-import { formatCPF, formatPhone } from '../../../core/utils/string.util';
+import { formatDocument, formatPhone } from '../../../core/utils/string.util';
 
 interface ClientInfoProps {
   client?: Client | null;
@@ -153,7 +153,7 @@ export function ClientInfo({
             </Typography>
 
             <Typography>
-              <strong>Documento:</strong> {formatCPF(client.document)}
+              <strong>Documento:</strong> {formatDocument(client.document)}
             </Typography>
 
             <Typography>
