@@ -13,6 +13,7 @@ import { v4 as uuid } from 'uuid';
 import { OrderService } from '../../core/api/service-order.service';
 import { useCompany } from '../../core/contexts/compnay.context';
 import { useSnackbar } from '../../core/contexts/snackbar.context';
+import type { Client } from '../../core/models/client.interface';
 import type {
   ServiceOrder,
   ServiceOrderItem,
@@ -50,8 +51,8 @@ export function ServiceOrderPage() {
 
   const [description, setDescription] = useState('');
   const [company, setCompany] = useState(decodedCompany);
-  const [client, setClient] = useState(null);
 
+  const [client, setClient] = useState<Client | null>(null);
   const [items, setItems] = useState<ServiceOrderItem[]>([
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
@@ -136,7 +137,7 @@ export function ServiceOrderPage() {
   async function createServiceOrder() {
     const payload = {
       description,
-      id_client: 1,
+      id_client: client?.id_client,
       products: items
         .filter(
           (item) =>
@@ -274,7 +275,7 @@ export function ServiceOrderPage() {
 
           <Divider sx={{ my: 3 }} />
 
-          <ClientInfo client={client} />
+          <ClientInfo client={client} onChange={(c) => setClient(c)} />
         </Box>
 
         <Box display="flex" flex="1">

@@ -22,11 +22,13 @@ import { ListClientModal } from '../../../core/ui/modals/list-client-modal';
 interface ClientInfoProps {
   client?: Client | null;
   hideChange?: boolean;
+  onChange: (c: Client | null) => void;
 }
 
 export function ClientInfo({
   client: initialClient,
   hideChange,
+  onChange,
 }: ClientInfoProps) {
   const [document, setDocument] = useState('');
   const [name, setName] = useState('');
@@ -40,7 +42,10 @@ export function ClientInfo({
 
   async function handleAddClient() {
     const newClient = await openDialog<Client>(<CreateClientModal />);
-    if (newClient) setClient(newClient);
+    if (newClient) {
+      setClient(newClient);
+      onChange(newClient);
+    }
   }
 
   async function handleSearchClient() {
@@ -49,6 +54,7 @@ export function ClientInfo({
     try {
       const result = await ClientService.get(document);
       setClient(result.data);
+      onChange(result.data);
     } catch (e) {
       snackbar.error('Cliente não encontrado');
       console.error(e);
@@ -59,12 +65,16 @@ export function ClientInfo({
     const clientSelected = await openDialog<Client>(
       <ListClientModal name={name} />,
     );
-    if (clientSelected) setClient(clientSelected);
+    if (clientSelected) {
+      setClient(clientSelected);
+      onChange(clientSelected);
+    }
   }
 
   function handleChangeClient() {
     setClient(null);
     setDocument('');
+    onChange(null);
   }
 
   return (
