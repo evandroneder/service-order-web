@@ -1,50 +1,27 @@
-import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
   Divider,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
-import api from '../api/axios';
-import { serviceOrderService } from '../api/service-order.service';
-import { ClientInfo } from '../components/client-info';
-import type { Company } from '../models/company.interface';
-import type { ServiceOrderItem } from '../models/service-order.interface';
-import { useSnackbar } from '../contexts/snackbar.context';
-
-/* =========================
-   TYPES
-========================= */
-
-type Column = {
-  key: keyof ServiceOrderItem;
-  label: string;
-  width?: number;
-  type?: 'text' | 'number';
-  disabled?: boolean;
-};
-
-/* =========================
-   COLUMNS CONFIG
-========================= */
-
-const columns: Column[] = [
-  { key: 'quantity', label: 'Qtd', width: 100, type: 'number' },
-  { key: 'description', label: 'Descrição', type: 'text' },
-  { key: 'value', label: 'Valor Unit.', width: 120, type: 'number' },
-  // { key: 'discount', label: 'Desconto', width: 120, type: 'number' },
-  { key: 'total', label: 'Total', width: 120, type: 'number', disabled: true },
-];
+import { OrderService } from '../../core/api/service-order.service';
+import { useCompany } from '../../core/contexts/compnay.context';
+import { useSnackbar } from '../../core/contexts/snackbar.context';
+import type { Client } from '../../core/models/client.interface';
+import type {
+  ServiceOrder,
+  ServiceOrderItem,
+} from '../../core/models/service-order.interface';
+import { ClientInfo } from './components/client-info';
+import { ServiceOrderItemsCards } from './components/service-order-items-card';
+import { ServiceOrderItemsTable } from './components/service-order-items-table';
+import { formatCEP, formatCNPJ } from '../../core/utils/string.util';
 
 /* =========================
    INITIAL ROW
@@ -65,26 +42,30 @@ const emptyRow: ServiceOrderItem = {
 
 export function ServiceOrderPage() {
   const { id } = useParams();
+  const { company: decodedCompany } = useCompany();
+
   const snackbar = useSnackbar();
+  const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [description, setDescription] = useState('');
-  const [company, setCompany] = useState(null);
-  const [client, setClient] = useState(null);
+  const [company, setCompany] = useState(decodedCompany);
+
+  const [client, setClient] = useState<Client | null>(null);
   const [items, setItems] = useState<ServiceOrderItem[]>([
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
-    { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
     { ...emptyRow, id: uuid() },
   ]);
 
+  const isEditting = useMemo(() => !!id, [id]);
+
   useEffect(() => {
     if (id) {
       async function loadServiceOrder() {
-        const { data } = await serviceOrderService.find(id);
+        const { data } = await OrderService.find(id);
 
         setDescription(data.description);
         setCompany(data.company);
@@ -108,15 +89,6 @@ export function ServiceOrderPage() {
       }
 
       loadServiceOrder();
-    } else {
-      const getCompanies = async () => {
-        const result = await api.get<Company[]>('/companies');
-
-        if (result.data.length > 0) {
-          setCompany(result.data[0]);
-        }
-      };
-      getCompanies();
     }
   }, [id]);
 
@@ -161,11 +133,14 @@ export function ServiceOrderPage() {
   //   0,
   // );
 
+  function cancelEdit() {
+    navigate('/service-orders/view/' + id);
+  }
+
   async function createServiceOrder() {
     const payload = {
       description,
-      id_client: 1,
-      id_company: company?.id_company,
+      id_client: client?.id_client,
       products: items
         .filter(
           (item) =>
@@ -181,31 +156,51 @@ export function ServiceOrderPage() {
         })),
     };
     if (id) {
-      await serviceOrderService
-        .update(id, payload)
-        .catch((e) => snackbar.error(e));
-      return;
+      try {
+        const response = await OrderService.update(id, payload);
+        snackbar.success('Atualizado com sucesso.');
+
+        navigate('/service-orders/view/' + response.data.id_service_order);
+      } catch (e) {
+        snackbar.error(e);
+      }
+    } else {
+      try {
+        const { data } = await OrderService.create<ServiceOrder>(payload);
+
+        snackbar.success(
+          'OS #' + data.id_service_order + ' criada com sucesso.',
+        );
+
+        navigate('/service-orders/view/' + data.id_service_order);
+      } catch (e) {
+        snackbar.error(e);
+      }
     }
-    await serviceOrderService.create(payload).catch((e) => snackbar.error(e));
   }
 
   /* =========================
      RENDER
   ========================= */
 
+  const imgConfig = isMobile ? 80 : 160;
+
   return (
-    <Box sx={{ mb: 6 }} justifyContent="center" display="flex">
-      <Box sx={{ mb: 6, maxWidth: '900px' }}>
-        <Box sx={{ p: 4 }}>
+    <Box justifyContent="center" display="flex">
+      <Box sx={{ maxWidth: '900px', flex: 1 }}>
+        <Box>
           {/* HEADER */}
           {company && (
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
               <Box>
                 <img
                   src={company.logo_url}
                   alt="Logo"
-                  height={220}
-                  width={220}
+                  height={imgConfig}
+                  width={imgConfig}
                   style={{ borderRadius: '50%' }}
                 />
               </Box>
@@ -215,9 +210,11 @@ export function ServiceOrderPage() {
                 <Typography variant="body2">
                   {company.street}, {company.number}
                 </Typography>
-                <Typography variant="body2">CEP: {company.cep}</Typography>
                 <Typography variant="body2">
-                  CNPJ: {company.document}
+                  CEP: {formatCEP(company.cep)}
+                </Typography>
+                <Typography variant="body2">
+                  CNPJ: {formatCNPJ(company.document)}
                 </Typography>
               </Box>
             </Box>
@@ -246,51 +243,19 @@ export function ServiceOrderPage() {
             Itens do Serviço
           </Typography>
 
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                {columns.map((col) => (
-                  <TableCell key={col.key} width={col.width}>
-                    {col.label}
-                  </TableCell>
-                ))}
-                <TableCell width={40} />
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {items.map((row) => (
-                <TableRow key={row.id}>
-                  {columns.map((col) => (
-                    <TableCell key={col.key}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        type={col.type}
-                        disabled={col.disabled}
-                        value={row[col.key]}
-                        onChange={(e) =>
-                          updateItem(
-                            row.id,
-                            col.key,
-                            col.type === 'number'
-                              ? Number(e.target.value)
-                              : e.target.value,
-                          )
-                        }
-                      />
-                    </TableCell>
-                  ))}
-
-                  <TableCell>
-                    <IconButton onClick={() => removeRow(row.id)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {isMobile ? (
+            <ServiceOrderItemsCards
+              items={items}
+              updateItem={updateItem}
+              removeRow={removeRow}
+            />
+          ) : (
+            <ServiceOrderItemsTable
+              items={items}
+              updateItem={updateItem}
+              removeRow={removeRow}
+            />
+          )}
 
           <Button onClick={addRow} sx={{ mt: 2 }}>
             Adicionar Item
@@ -315,13 +280,30 @@ export function ServiceOrderPage() {
 
           <Divider sx={{ my: 3 }} />
 
-          <ClientInfo client={client} />
+          <ClientInfo
+            client={client}
+            hideChange={isEditting}
+            onChange={(c) => setClient(c)}
+          />
         </Box>
 
         <Box display="flex" flex="1">
-          <Box display="flex" justifyContent="flex-end" marginTop={2} flex={1}>
-            <Button variant="contained" onClick={createServiceOrder}>
-              Efetivar
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            marginTop={2}
+            flex={1}
+            gap={1}>
+            {id && (
+              <Button variant="contained" onClick={cancelEdit}>
+                Cancelar
+              </Button>
+            )}
+            <Button
+              variant="contained"
+              color="success"
+              onClick={createServiceOrder}>
+              {id ? 'Atualizar' : 'Efetivar'}
             </Button>
           </Box>
         </Box>

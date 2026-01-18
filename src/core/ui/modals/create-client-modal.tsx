@@ -4,14 +4,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Stack,
+  TextField,
 } from '@mui/material';
-import { useState } from 'react';
 import axios from 'axios';
-import api from '../api/axios';
-import { useSnackbar } from '../contexts/snackbar.context';
-import type { Client } from '../models/client.interface';
+import { useState } from 'react';
+import { ClientService } from '../../api/client.service';
+import { useSnackbar } from '../../contexts/snackbar.context';
+import type { Client } from '../../models/client.interface';
+import type { DialogProps } from '../../contexts/dialog.context';
 
 type ViaCepResponse = {
   logradouro: string;
@@ -21,12 +22,7 @@ type ViaCepResponse = {
   erro?: boolean;
 };
 
-type Props = {
-  onClose?: () => void;
-  onConfirm?: (data) => void;
-};
-
-export function CreateClientModal({ onClose, onConfirm }: Props) {
+export function CreateClientModal({ onClose, onConfirm }: DialogProps) {
   const snackbar = useSnackbar();
   const [form, setForm] = useState<Omit<Client, 'id_client'>>({
     name: '',
@@ -64,7 +60,7 @@ export function CreateClientModal({ onClose, onConfirm }: Props) {
 
   async function handleSave() {
     try {
-      const result = await api.post('/client', form);
+      const result = await ClientService.create(form);
       onConfirm?.(result.data);
     } catch (e) {
       snackbar.error(e);
@@ -150,7 +146,7 @@ export function CreateClientModal({ onClose, onConfirm }: Props) {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={() => onClose()}>Cancelar</Button>
         <Button variant="contained" onClick={handleSave}>
           Salvar
         </Button>

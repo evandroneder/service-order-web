@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   Divider,
   Table,
   TableBody,
@@ -9,29 +8,32 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { serviceOrderService } from '../api/service-order.service';
-import { ClientInfo } from '../components/client-info';
-import type { ServiceOrder } from '../models/service-order.interface';
-import moment from 'moment';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { OrderService } from '../../core/api/service-order.service';
+import type { ServiceOrder } from '../../core/models/service-order.interface';
+import { generateServiceOrderPDF } from '../../core/pdf/generate-service-order';
+import { ClientInfo } from './components/client-info';
+import { formatCNPJ } from '../../core/utils/string.util';
 
 /* =========================
    PAGE
 ========================= */
 
 export function ViewServiceOrderPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
-  const pdfRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [serviceOrder, setServiceOrder] = useState<ServiceOrder | null>(null);
 
   useEffect(() => {
     async function loadServiceOrder() {
-      const { data } = await serviceOrderService.find(id);
+      const { data } = await OrderService.find(id);
 
       setServiceOrder(data);
     }
@@ -48,44 +50,36 @@ export function ViewServiceOrderPage() {
     0,
   );
 
+  function handleEdit() {
+    navigate('/service-orders/edit/' + serviceOrder.id_service_order);
+  }
+
   async function handleGeneratePDF() {
-    if (!pdfRef.current) return;
+    if (!serviceOrder) return;
 
-    const canvas = await html2canvas(pdfRef.current, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-    const fileName = serviceOrder.client.name.replaceAll(' ', '_');
-    const today = moment().format('DD/MM/YYYY');
-    pdf.save(`${fileName}_${today}_OS.pdf`);
+    await generateServiceOrderPDF(serviceOrder);
   }
 
   /* =========================
      RENDER
   ========================= */
 
+  const imgConfig = isMobile ? 80 : 160;
   return (
-    <Container maxWidth={'md'} sx={{ mb: 6 }}>
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ p: 4, width: '100%' }} ref={pdfRef}>
+    <Box justifyContent="center" display="flex">
+      <Box sx={{ maxWidth: '900px', flex: 1 }}>
+        <Box>
           {/* HEADER */}
           {serviceOrder.company && (
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
               <img
                 src={serviceOrder.company.logo_url}
                 alt="Logo"
-                height={160}
-                width={160}
+                height={imgConfig}
+                width={imgConfig}
                 style={{ borderRadius: '50%' }}
               />
 
@@ -100,7 +94,7 @@ export function ViewServiceOrderPage() {
                   CEP: {serviceOrder.company.cep}
                 </Typography>
                 <Typography variant="body2">
-                  CNPJ: {serviceOrder.company.document}
+                  CNPJ: {formatCNPJ(serviceOrder.company.document)}
                 </Typography>
               </Box>
             </Box>
@@ -162,16 +156,23 @@ export function ViewServiceOrderPage() {
         </Box>
 
         {/* FOOTER */}
+
         <Box
-          sx={{ p: 4, width: '100%' }}
+          sx={{ width: '100%', gap: 1 }}
           display="flex"
           justifyContent="flex-end"
           mt={3}>
-          <Button variant="contained" onClick={handleGeneratePDF}>
+          <Button variant="outlined" onClick={handleEdit}>
+            Editar
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleGeneratePDF}>
             Exportar PDF
           </Button>
         </Box>
       </Box>
-    </Container>
+    </Box>
   );
 }

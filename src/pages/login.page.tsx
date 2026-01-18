@@ -1,6 +1,6 @@
-import { Box, Button, TextField, Typography, Paper } from '@mui/material';
+import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useAuth } from '../auth/auth.context';
+import { useAuth } from '../core/auth/auth.context';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -39,7 +39,11 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Button variant="contained" fullWidth onClick={handleSubmit}>
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!username || !password}>
           Entrar
         </Button>
       </Paper>

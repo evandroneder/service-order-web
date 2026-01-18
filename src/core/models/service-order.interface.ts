@@ -15,6 +15,6 @@ export interface ServiceOrder {
   client: Client;
   company: Company;
   description: string;
-  code: string;
-  id_service_irder: number;
+  id_service_order: number;
+  created_at: string;
 }
